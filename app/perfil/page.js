@@ -10,6 +10,7 @@ import Label from '../components/ui/Label'
 import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
 import Modal from '../components/ui/Modal'
+import InfoIcon from '../components/ui/InfoIcon'
 
 function formatarDataPT(dataStr) {
   if (!dataStr) return ''
@@ -208,7 +209,13 @@ export default function Perfil() {
         </div>
 
         <div>
-          <Label htmlFor="data-inicio">Data de início de atividade</Label>
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="data-inicio">Data de início de atividade</Label>
+            <InfoIcon
+              titulo="Data de início de atividade"
+              texto="Determina se estás no teu 1º ano de atividade, período em que estás isento de pagar Segurança Social. Essa isenção acaba automaticamente a partir do 12º mês."
+            />
+          </div>
           <Input
             id="data-inicio"
             type="date"
@@ -218,7 +225,13 @@ export default function Perfil() {
         </div>
 
         <div>
-          <Label htmlFor="categoria">Categoria de atividade</Label>
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="categoria">Categoria de atividade</Label>
+            <InfoIcon
+              titulo="Categoria de atividade (coeficiente)"
+              texto="É a percentagem do que faturas que conta como &quot;lucro&quot; para efeitos de impostos — o resto é tratado como despesa automática, mesmo que não a tenhas tido. Profissões liberais têm coeficiente mais alto (75%), o que costuma significar pagar mais impostos sobre o mesmo valor faturado do que, por exemplo, quem vende mercadorias (15%)."
+            />
+          </div>
           <Select id="categoria" value={categoriaCoeficiente} onChange={(e) => setCategoriaCoeficiente(e.target.value)}>
             <option value="0.75">Profissão liberal (75%)</option>
             <option value="0.35">Outros serviços (35%)</option>
@@ -227,7 +240,13 @@ export default function Perfil() {
         </div>
 
         <div>
-          <Label htmlFor="regime-iva">Regime de IVA</Label>
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="regime-iva">Regime de IVA</Label>
+            <InfoIcon
+              titulo="Regime de IVA"
+              texto="Isento (art. 53º) significa que não cobras IVA aos teus clientes — só podes escolher isto se faturares abaixo de um limite anual. Regime normal significa que cobras IVA nos teus recibos e depois entregas esse valor ao Estado; não é dinheiro teu, só passa pela tua conta."
+            />
+          </div>
           <Select id="regime-iva" value={regimeIva} onChange={(e) => setRegimeIva(e.target.value)}>
             <option value="isento">Isento</option>
             <option value="normal">Normal</option>
@@ -235,32 +254,50 @@ export default function Perfil() {
         </div>
 
         <div>
-          <Label htmlFor="taxa-ss">Taxa de Segurança Social</Label>
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="taxa-ss">Taxa de Segurança Social</Label>
+            <InfoIcon
+              titulo="Taxa de Segurança Social"
+              texto="É a percentagem que pagas sobre o rendimento relevante. A taxa de 25,2% dá mais proteção social (por exemplo, um subsídio de doença mais alto), mas custa mais por mês do que a taxa padrão de 21,4%."
+            />
+          </div>
           <Select id="taxa-ss" value={taxaSS} onChange={(e) => setTaxaSS(e.target.value)}>
             <option value="0.214">21,4%</option>
             <option value="0.252">25,2%</option>
           </Select>
         </div>
 
-        <label className="flex items-center gap-2.5 text-sm text-gray-900">
-          <input
-            type="checkbox"
-            checked={acumulaOutroTrabalho}
-            onChange={(e) => setAcumulaOutroTrabalho(e.target.checked)}
-            className="accent-brand-navy w-4 h-4"
+        <div className="flex items-center gap-1.5 text-sm text-gray-900">
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={acumulaOutroTrabalho}
+              onChange={(e) => setAcumulaOutroTrabalho(e.target.checked)}
+              className="accent-brand-navy w-4 h-4"
+            />
+            Acumula com trabalho por conta de outrem
+          </label>
+          <InfoIcon
+            titulo="Acumula com trabalho por conta de outrem"
+            texto="Se já descontas para a Segurança Social através de um emprego por conta de outrem, podes ficar isento de descontar também como independente, dependendo da tua situação em concreto."
           />
-          Acumula com trabalho por conta de outrem
-        </label>
+        </div>
 
-        <label className="flex items-center gap-2.5 text-sm text-gray-900">
-          <input
-            type="checkbox"
-            checked={pensionista}
-            onChange={(e) => setPensionista(e.target.checked)}
-            className="accent-brand-navy w-4 h-4"
+        <div className="flex items-center gap-1.5 text-sm text-gray-900">
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={pensionista}
+              onChange={(e) => setPensionista(e.target.checked)}
+              className="accent-brand-navy w-4 h-4"
+            />
+            É pensionista
+          </label>
+          <InfoIcon
+            titulo="Pensionista / reformado"
+            texto="Quem já é pensionista e também trabalha como independente está, geralmente, isento de descontar para a Segurança Social nesta atividade."
           />
-          É pensionista
-        </label>
+        </div>
 
         <Button onClick={guardarPerfil}>Guardar perfil</Button>
       </Card>

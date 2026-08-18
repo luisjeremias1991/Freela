@@ -10,6 +10,7 @@ import PageTitle from '../components/ui/PageTitle'
 import Label from '../components/ui/Label'
 import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
+import InfoIcon from '../components/ui/InfoIcon'
 
 function estaNoPeriodo(dataStr, periodo) {
   if (periodo === 'todos') return true
@@ -222,20 +223,32 @@ export default function Recibos() {
         </div>
 
         <div>
-          <Label htmlFor="data-pagamento">Data de pagamento</Label>
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="data-pagamento">Data de pagamento</Label>
+            <InfoIcon
+              titulo="Data de pagamento"
+              texto="Deixa este campo vazio se ainda não recebeste. Assim que o cliente pagar, volta aqui e preenche a data — isso atualiza automaticamente o estado do recibo para &quot;Pago&quot; e ajusta os cálculos do Painel."
+            />
+          </div>
           <Input id="data-pagamento" type="date" value={dataPagamento} onChange={(e) => setDataPagamento(e.target.value)} />
           {!dataPagamento && <p className="text-xs text-brand-muted mt-1">Ainda não foi pago</p>}
         </div>
 
-        <label className="flex items-center gap-2.5 text-sm text-gray-900">
-          <input
-            type="checkbox"
-            checked={retencao}
-            onChange={(e) => setRetencao(e.target.checked)}
-            className="accent-brand-navy w-4 h-4"
+        <div className="flex items-center gap-1.5 text-sm text-gray-900">
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={retencao}
+              onChange={(e) => setRetencao(e.target.checked)}
+              className="accent-brand-navy w-4 h-4"
+            />
+            Retenção na fonte
+          </label>
+          <InfoIcon
+            titulo="Retenção na fonte"
+            texto="Normalmente aplica-se quando o cliente é uma empresa — é ela que desconta o IRS antes de te pagar e entrega-o ao Estado. Se o cliente for um particular, muitas vezes não há retenção, e recebes o valor todo."
           />
-          Retenção na fonte
-        </label>
+        </div>
 
         <div className="flex gap-2.5">
           <Button className="flex-1" onClick={guardarRecibo}>

@@ -7,6 +7,7 @@ import Card from '../components/ui/Card'
 import PageTitle from '../components/ui/PageTitle'
 import Label from '../components/ui/Label'
 import Input from '../components/ui/Input'
+import InfoIcon from '../components/ui/InfoIcon'
 
 export default function Simulador() {
   const { perfil } = usePerfil()
@@ -94,36 +95,60 @@ export default function Simulador() {
           />
         </div>
 
-        <label className="flex items-center gap-2.5 text-sm text-gray-900">
-          <input
-            type="checkbox"
-            checked={primeiroAno}
-            onChange={(e) => setPrimeiroAno(e.target.checked)}
-            className="accent-brand-navy w-4 h-4"
+        <div className="flex items-center gap-1.5 text-sm text-gray-900">
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={primeiroAno}
+              onChange={(e) => setPrimeiroAno(e.target.checked)}
+              className="accent-brand-navy w-4 h-4"
+            />
+            1º ano de atividade
+          </label>
+          <InfoIcon
+            titulo="1º ano de atividade"
+            texto="No primeiro ano como trabalhador independente estás isento de pagar Segurança Social. Essa isenção acaba automaticamente a partir do 12º mês de atividade."
           />
-          1º ano de atividade
-        </label>
+        </div>
 
-        <label className="flex items-center gap-2.5 text-sm text-gray-900">
-          <input
-            type="checkbox"
-            checked={retencaoFonte}
-            onChange={(e) => setRetencaoFonte(e.target.checked)}
-            className="accent-brand-navy w-4 h-4"
+        <div className="flex items-center gap-1.5 text-sm text-gray-900">
+          <label className="flex items-center gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={retencaoFonte}
+              onChange={(e) => setRetencaoFonte(e.target.checked)}
+              className="accent-brand-navy w-4 h-4"
+            />
+            Cliente retém na fonte
+          </label>
+          <InfoIcon
+            titulo="Retenção na fonte"
+            texto="Normalmente aplica-se quando o cliente é uma empresa — é ela que desconta o IRS antes de te pagar e entrega-o ao Estado. Se o cliente for um particular, muitas vezes não há retenção, e recebes o valor todo."
           />
-          Cliente retém na fonte
-        </label>
+        </div>
       </Card>
 
       {modo === 'brutoLiquido' ? (
         <>
           <Card className="mb-4">
-            <p className="text-sm text-brand-muted mb-1">Retenção de IRS</p>
+            <p className="text-sm text-brand-muted mb-1 flex items-center gap-1.5">
+              Retenção de IRS
+              <InfoIcon
+                titulo="Retenção de IRS"
+                texto="É o valor que o cliente desconta logo no recibo e entrega diretamente ao Estado, por tua conta. No fim do ano, conta como um adiantamento do teu IRS."
+              />
+            </p>
             <p className="text-2xl font-bold text-gray-900">{irs.toFixed(2)} €</p>
           </Card>
 
           <Card className="mb-4">
-            <p className="text-sm text-brand-muted mb-1">Segurança Social</p>
+            <p className="text-sm text-brand-muted mb-1 flex items-center gap-1.5">
+              Segurança Social
+              <InfoIcon
+                titulo="Segurança Social"
+                texto="É a tua contribuição mensal que te dá direito a subsídios e à reforma no futuro. Calcula-se sobre 70% da tua faturação, não sobre o valor todo."
+              />
+            </p>
             <p className="text-2xl font-bold text-gray-900">{ss.toFixed(2)} €</p>
           </Card>
 
@@ -140,12 +165,24 @@ export default function Simulador() {
           </Card>
 
           <Card className="mb-4">
-            <p className="text-sm text-brand-muted mb-1">Retenção de IRS</p>
+            <p className="text-sm text-brand-muted mb-1 flex items-center gap-1.5">
+              Retenção de IRS
+              <InfoIcon
+                titulo="Retenção de IRS"
+                texto="É o valor que o cliente desconta logo no recibo e entrega diretamente ao Estado, por tua conta. No fim do ano, conta como um adiantamento do teu IRS."
+              />
+            </p>
             <p className="text-2xl font-bold text-gray-900">{irsSobreBruto.toFixed(2)} €</p>
           </Card>
 
           <Card>
-            <p className="text-sm text-brand-muted mb-1">Segurança Social</p>
+            <p className="text-sm text-brand-muted mb-1 flex items-center gap-1.5">
+              Segurança Social
+              <InfoIcon
+                titulo="Segurança Social"
+                texto="É a tua contribuição mensal que te dá direito a subsídios e à reforma no futuro. Calcula-se sobre 70% da tua faturação, não sobre o valor todo."
+              />
+            </p>
             <p className="text-2xl font-bold text-gray-900">{ssSobreBruto.toFixed(2)} €</p>
           </Card>
         </>

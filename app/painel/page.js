@@ -8,6 +8,7 @@ import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import PageTitle from '../components/ui/PageTitle'
 import Input from '../components/ui/Input'
+import InfoIcon from '../components/ui/InfoIcon'
 
 function topClientes(recibos) {
   const totaisPorCliente = {}
@@ -137,20 +138,44 @@ export default function Painel() {
             <h3 className="font-semibold text-gray-900 mb-1">Pôr de lado</h3>
             <p className="text-xs text-brand-muted mb-3">Estimativas — confirma sempre com o teu contabilista.</p>
 
-            <div className="flex justify-between py-2 border-b border-brand-line text-sm">
-              <span className="text-brand-muted">IVA</span>
+            <div className="flex justify-between items-center py-2 border-b border-brand-line text-sm">
+              <span className="text-brand-muted flex items-center gap-1.5">
+                IVA
+                <InfoIcon
+                  titulo="Limite de isenção de IVA"
+                  texto="É o valor de faturação anual a partir do qual deixas de poder estar isento de IVA. Ao ultrapassá-lo, passas automaticamente para o regime normal e tens de começar a cobrar e entregar IVA nos teus recibos."
+                />
+              </span>
               <strong className="text-gray-900">{ivaAPorDeLado.toFixed(2)} €</strong>
             </div>
-            <div className="flex justify-between py-2 border-b border-brand-line text-sm">
-              <span className="text-brand-muted">Segurança Social</span>
+            <div className="flex justify-between items-center py-2 border-b border-brand-line text-sm">
+              <span className="text-brand-muted flex items-center gap-1.5">
+                Segurança Social
+                <InfoIcon
+                  titulo="Segurança Social"
+                  texto="É a tua contribuição obrigatória, entregue trimestralmente. Não é descontada pelo cliente — tens de a pagar tu, a partir do que recebeste."
+                />
+              </span>
               <strong className="text-gray-900">{ssAPorDeLado.toFixed(2)} €</strong>
             </div>
-            <div className="flex justify-between py-2 border-b border-brand-line text-sm">
-              <span className="text-brand-muted">Pagamentos por conta</span>
+            <div className="flex justify-between items-center py-2 border-b border-brand-line text-sm">
+              <span className="text-brand-muted flex items-center gap-1.5">
+                Pagamentos por conta
+                <InfoIcon
+                  titulo="Pagamentos por conta"
+                  texto="É um mecanismo do regime de contabilidade organizada, para adiantar IRS ao longo do ano. No regime simplificado (o mais comum em recibos verdes) normalmente não se aplica — por isso aparece como &quot;ainda não disponível&quot; aqui."
+                />
+              </span>
               <strong className="text-brand-muted font-normal">Ainda não disponível</strong>
             </div>
-            <div className="flex justify-between py-2 text-sm">
-              <span className="text-brand-muted">IRS a pagar (sem retenção)</span>
+            <div className="flex justify-between items-center py-2 text-sm">
+              <span className="text-brand-muted flex items-center gap-1.5">
+                IRS a pagar (sem retenção)
+                <InfoIcon
+                  titulo="IRS a pagar (sem retenção)"
+                  texto="Quando um cliente não desconta IRS no momento do pagamento, esse valor não desaparece — fica para pagares de uma vez na declaração anual de IRS, no ano seguinte."
+                />
+              </span>
               <strong className="text-gray-900">{irsSemRetencaoAPorDeLado.toFixed(2)} €</strong>
             </div>
           </Card>
