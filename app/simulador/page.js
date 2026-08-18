@@ -3,6 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePerfil } from '../context/PerfilContext'
+import Card from '../components/ui/Card'
+import PageTitle from '../components/ui/PageTitle'
+import Label from '../components/ui/Label'
+import Input from '../components/ui/Input'
 
 export default function Simulador() {
   const { perfil } = usePerfil()
@@ -41,111 +45,109 @@ export default function Simulador() {
   const ssSobreBruto = brutoNecessario * taxaSS
 
   return (
-    <div style={{ maxWidth: 500, margin: '60px auto', padding: 20 }}>
-      <h1>Simulador</h1>
+    <div className="max-w-md mx-auto px-5 py-10">
+      <PageTitle>Simulador</PageTitle>
 
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+      <div className="flex gap-2.5 mb-5">
         <button
           onClick={() => selecionarModo('brutoLiquido')}
-          style={{
-            flex: 1,
-            padding: 10,
-            border: modo === 'brutoLiquido' ? '2px solid #10284D' : '1px solid #444',
-            background: modo === 'brutoLiquido' ? '#10284D' : 'transparent',
-            color: modo === 'brutoLiquido' ? '#fff' : 'inherit',
-            cursor: 'pointer'
-          }}
+          className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
+            modo === 'brutoLiquido'
+              ? 'bg-brand-navy text-white border-2 border-brand-navy'
+              : 'bg-white text-gray-900 border border-brand-line'
+          }`}
         >
           Bruto → Líquido
         </button>
         <button
           onClick={() => selecionarModo('liquidoBruto')}
-          style={{
-            flex: 1,
-            padding: 10,
-            border: modo === 'liquidoBruto' ? '2px solid #10284D' : '1px solid #444',
-            background: modo === 'liquidoBruto' ? '#10284D' : 'transparent',
-            color: modo === 'liquidoBruto' ? '#fff' : 'inherit',
-            cursor: 'pointer'
-          }}
+          className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
+            modo === 'liquidoBruto'
+              ? 'bg-brand-navy text-white border-2 border-brand-navy'
+              : 'bg-white text-gray-900 border border-brand-line'
+          }`}
         >
           Líquido → Bruto
         </button>
       </div>
 
       {mostrarUpsell && (
-        <p style={{ padding: 15, border: '1px solid #444', marginBottom: 20 }}>
-          O simulador inverso (líquido → bruto) é uma funcionalidade Freela Pro.{' '}
-          <Link href="/perfil" style={{ color: '#10284D', fontWeight: 'bold' }}>Subscreve aqui</Link> para o desbloqueares.
-        </p>
+        <Card className="mb-5">
+          <p className="text-sm text-gray-900">
+            O simulador inverso (líquido → bruto) é uma funcionalidade Freela Pro.{' '}
+            <Link href="/perfil" className="text-brand-navy font-semibold">Subscreve aqui</Link> para o desbloqueares.
+          </p>
+        </Card>
       )}
 
-      <div style={{ marginBottom: 30, padding: 15, border: '1px solid #444' }}>
-        <label style={{ display: 'block', marginBottom: 4 }}>
-          {modo === 'brutoLiquido' ? 'Valor da proposta (€)' : 'Valor líquido desejado (€)'}
-        </label>
-        <input
-          type="number"
-          placeholder={modo === 'brutoLiquido' ? 'Valor da proposta (€)' : 'Valor líquido desejado (€)'}
-          value={valor}
-          onChange={(e) => setValor(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        />
+      <Card className="mb-8 flex flex-col gap-4">
+        <div>
+          <Label htmlFor="valor-simulador">
+            {modo === 'brutoLiquido' ? 'Valor da proposta (€)' : 'Valor líquido desejado (€)'}
+          </Label>
+          <Input
+            id="valor-simulador"
+            type="number"
+            placeholder={modo === 'brutoLiquido' ? 'Valor da proposta (€)' : 'Valor líquido desejado (€)'}
+            value={valor}
+            onChange={(e) => setValor(e.target.value)}
+          />
+        </div>
 
-        <label style={{ display: 'block', marginBottom: 10 }}>
+        <label className="flex items-center gap-2.5 text-sm text-gray-900">
           <input
             type="checkbox"
             checked={primeiroAno}
             onChange={(e) => setPrimeiroAno(e.target.checked)}
-            style={{ marginRight: 8 }}
+            className="accent-brand-navy w-4 h-4"
           />
           1º ano de atividade
         </label>
 
-        <label style={{ display: 'block', marginBottom: 10 }}>
+        <label className="flex items-center gap-2.5 text-sm text-gray-900">
           <input
             type="checkbox"
             checked={retencaoFonte}
             onChange={(e) => setRetencaoFonte(e.target.checked)}
-            style={{ marginRight: 8 }}
+            className="accent-brand-navy w-4 h-4"
           />
           Cliente retém na fonte
         </label>
-      </div>
+      </Card>
 
       {modo === 'brutoLiquido' ? (
         <>
-          <div style={{ padding: 15, border: '1px solid #444', marginBottom: 15 }}>
-            <p>Retenção de IRS</p>
-            <h2>{irs.toFixed(2)} €</h2>
-          </div>
+          <Card className="mb-4">
+            <p className="text-sm text-brand-muted mb-1">Retenção de IRS</p>
+            <p className="text-2xl font-bold text-gray-900">{irs.toFixed(2)} €</p>
+          </Card>
 
-          <div style={{ padding: 15, border: '1px solid #444', marginBottom: 15 }}>
-            <p>Segurança Social</p>
-            <h2>{ss.toFixed(2)} €</h2>
-          </div>
+          <Card className="mb-4">
+            <p className="text-sm text-brand-muted mb-1">Segurança Social</p>
+            <p className="text-2xl font-bold text-gray-900">{ss.toFixed(2)} €</p>
+          </Card>
 
-          <div style={{ padding: 15, border: '1px solid #444' }}>
-            <p>Valor líquido</p>
-            <h2>{liquido.toFixed(2)} €</h2>
-          </div>
+          <Card>
+            <p className="text-sm text-brand-muted mb-1">Valor líquido</p>
+            <p className="text-2xl font-bold text-gray-900">{liquido.toFixed(2)} €</p>
+          </Card>
         </>
       ) : (
         <>
-          <div style={{ padding: 15, border: '1px solid #444', marginBottom: 15 }}>
-            <p>Valor bruto necessário</p>
-            <h2>{brutoNecessario.toFixed(2)} €</h2>
-          </div>
+          <Card className="mb-4">
+            <p className="text-sm text-brand-muted mb-1">Valor bruto necessário</p>
+            <p className="text-2xl font-bold text-gray-900">{brutoNecessario.toFixed(2)} €</p>
+          </Card>
 
-          <div style={{ padding: 15, border: '1px solid #444', marginBottom: 15 }}>
-            <p>Retenção de IRS</p>
-            <h2>{irsSobreBruto.toFixed(2)} €</h2>
-          </div>
+          <Card className="mb-4">
+            <p className="text-sm text-brand-muted mb-1">Retenção de IRS</p>
+            <p className="text-2xl font-bold text-gray-900">{irsSobreBruto.toFixed(2)} €</p>
+          </Card>
 
-          <div style={{ padding: 15, border: '1px solid #444' }}>
-            <p>Segurança Social</p>
-            <h2>{ssSobreBruto.toFixed(2)} €</h2>
-          </div>
+          <Card>
+            <p className="text-sm text-brand-muted mb-1">Segurança Social</p>
+            <p className="text-2xl font-bold text-gray-900">{ssSobreBruto.toFixed(2)} €</p>
+          </Card>
         </>
       )}
     </div>

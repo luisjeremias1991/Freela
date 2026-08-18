@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { usePerfil } from '../context/PerfilContext'
+import Card from '../components/ui/Card'
+import Button from '../components/ui/Button'
+import PageTitle from '../components/ui/PageTitle'
+import Label from '../components/ui/Label'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Modal from '../components/ui/Modal'
 
 function formatarDataPT(dataStr) {
   if (!dataStr) return ''
@@ -183,207 +190,153 @@ export default function Perfil() {
     chamarCancelSubscription('reativar', 'A reativar subscrição...')
   }
 
-  if (carregando) return <p style={{ padding: 20 }}>A carregar...</p>
+  if (carregando) return <p className="p-5 text-brand-muted">A carregar...</p>
 
   return (
-    <div style={{ maxWidth: 500, margin: '60px auto', padding: 20 }}>
-      <h1>Perfil</h1>
+    <div className="max-w-md mx-auto px-5 py-10">
+      <PageTitle>Perfil</PageTitle>
 
-      <div style={{ marginBottom: 30, padding: 15, border: '1px solid #444' }}>
-        <label style={{ display: 'block', marginBottom: 4 }}>Nome</label>
-        <input
-          type="text"
-          placeholder="Nome"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        />
+      <Card className="mb-8 flex flex-col gap-5">
+        <div>
+          <Label htmlFor="nome">Nome</Label>
+          <Input id="nome" type="text" placeholder="Nome" value={nome} onChange={(e) => setNome(e.target.value)} />
+        </div>
 
-        <label style={{ display: 'block', marginBottom: 4 }}>NIF</label>
-        <input
-          type="text"
-          placeholder="NIF"
-          value={nif}
-          onChange={(e) => setNif(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        />
+        <div>
+          <Label htmlFor="nif">NIF</Label>
+          <Input id="nif" type="text" placeholder="NIF" value={nif} onChange={(e) => setNif(e.target.value)} />
+        </div>
 
-        <label style={{ display: 'block', marginBottom: 4 }}>Data de início de atividade</label>
-        <input
-          type="date"
-          value={dataInicioAtividade}
-          onChange={(e) => setDataInicioAtividade(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        />
+        <div>
+          <Label htmlFor="data-inicio">Data de início de atividade</Label>
+          <Input
+            id="data-inicio"
+            type="date"
+            value={dataInicioAtividade}
+            onChange={(e) => setDataInicioAtividade(e.target.value)}
+          />
+        </div>
 
-        <label style={{ display: 'block', marginBottom: 4 }}>Categoria de atividade</label>
-        <select
-          value={categoriaCoeficiente}
-          onChange={(e) => setCategoriaCoeficiente(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        >
-          <option value="0.75">Profissão liberal (75%)</option>
-          <option value="0.35">Outros serviços (35%)</option>
-          <option value="0.15">Venda de mercadorias (15%)</option>
-        </select>
+        <div>
+          <Label htmlFor="categoria">Categoria de atividade</Label>
+          <Select id="categoria" value={categoriaCoeficiente} onChange={(e) => setCategoriaCoeficiente(e.target.value)}>
+            <option value="0.75">Profissão liberal (75%)</option>
+            <option value="0.35">Outros serviços (35%)</option>
+            <option value="0.15">Venda de mercadorias (15%)</option>
+          </Select>
+        </div>
 
-        <label style={{ display: 'block', marginBottom: 4 }}>Regime de IVA</label>
-        <select
-          value={regimeIva}
-          onChange={(e) => setRegimeIva(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        >
-          <option value="isento">Isento</option>
-          <option value="normal">Normal</option>
-        </select>
+        <div>
+          <Label htmlFor="regime-iva">Regime de IVA</Label>
+          <Select id="regime-iva" value={regimeIva} onChange={(e) => setRegimeIva(e.target.value)}>
+            <option value="isento">Isento</option>
+            <option value="normal">Normal</option>
+          </Select>
+        </div>
 
-        <label style={{ display: 'block', marginBottom: 4 }}>Taxa de Segurança Social</label>
-        <select
-          value={taxaSS}
-          onChange={(e) => setTaxaSS(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        >
-          <option value="0.214">21,4%</option>
-          <option value="0.252">25,2%</option>
-        </select>
+        <div>
+          <Label htmlFor="taxa-ss">Taxa de Segurança Social</Label>
+          <Select id="taxa-ss" value={taxaSS} onChange={(e) => setTaxaSS(e.target.value)}>
+            <option value="0.214">21,4%</option>
+            <option value="0.252">25,2%</option>
+          </Select>
+        </div>
 
-        <label style={{ display: 'block', marginBottom: 10 }}>
+        <label className="flex items-center gap-2.5 text-sm text-gray-900">
           <input
             type="checkbox"
             checked={acumulaOutroTrabalho}
             onChange={(e) => setAcumulaOutroTrabalho(e.target.checked)}
-            style={{ marginRight: 8 }}
+            className="accent-brand-navy w-4 h-4"
           />
           Acumula com trabalho por conta de outrem
         </label>
 
-        <label style={{ display: 'block', marginBottom: 10 }}>
+        <label className="flex items-center gap-2.5 text-sm text-gray-900">
           <input
             type="checkbox"
             checked={pensionista}
             onChange={(e) => setPensionista(e.target.checked)}
-            style={{ marginRight: 8 }}
+            className="accent-brand-navy w-4 h-4"
           />
           É pensionista
         </label>
 
-        <button onClick={guardarPerfil} style={{ padding: 10 }}>Guardar perfil</button>
-      </div>
+        <Button onClick={guardarPerfil}>Guardar perfil</Button>
+      </Card>
 
-      <p>{mensagem}</p>
+      {mensagem && <p className="text-sm text-brand-muted mb-8 -mt-4">{mensagem}</p>}
 
-      <h3>Plano</h3>
-      {carregandoPerfil && <p style={{ color: '#888' }}>A carregar plano...</p>}
+      <h2 className="text-lg font-semibold text-gray-900 mb-3">Plano</h2>
+      {carregandoPerfil && <p className="text-sm text-brand-muted">A carregar plano...</p>}
 
       {!carregandoPerfil && !perfil?.is_pro && (
-        <div style={{ padding: 15, border: '1px solid #444', marginBottom: 15 }}>
-          <h4>Plano Grátis</h4>
-          <p style={{ color: '#888' }}>Estás a usar a versão gratuita do Freela.</p>
-          <button onClick={() => setModalProAberto(true)} style={{ padding: 10 }}>Ver Freela Pro</button>
-        </div>
+        <Card className="mb-4">
+          <h3 className="font-semibold text-gray-900 mb-1">Plano Grátis</h3>
+          <p className="text-sm text-brand-muted mb-4">Estás a usar a versão gratuita do Freela.</p>
+          <Button onClick={() => setModalProAberto(true)}>Ver Freela Pro</Button>
+        </Card>
       )}
 
       {!carregandoPerfil && perfil?.is_pro && !perfil?.pro_cancelled && (
-        <div style={{ padding: 15, border: '1px solid #10284D', marginBottom: 15 }}>
-          <h4>Freela Pro ativo</h4>
-          <p style={{ color: '#888' }}>Já tens acesso a todas as funcionalidades Pro.</p>
-          <button onClick={cancelarSubscricao} style={{ padding: 10 }}>Cancelar subscrição</button>
-        </div>
+        <Card className="mb-4 border-brand-navy">
+          <h3 className="font-semibold text-gray-900 mb-1">Freela Pro ativo</h3>
+          <p className="text-sm text-brand-muted mb-4">Já tens acesso a todas as funcionalidades Pro.</p>
+          <Button variant="secondary" onClick={cancelarSubscricao}>Cancelar subscrição</Button>
+        </Card>
       )}
 
       {!carregandoPerfil && perfil?.is_pro && perfil?.pro_cancelled && (
-        <div style={{ padding: 15, border: '1px solid #10284D', marginBottom: 15 }}>
-          <h4>Freela Pro ativo</h4>
-          <p style={{ color: '#888' }}>
+        <Card className="mb-4 border-brand-navy">
+          <h3 className="font-semibold text-gray-900 mb-1">Freela Pro ativo</h3>
+          <p className="text-sm text-brand-muted mb-4">
             Cancelamento agendado para {formatarDataPT(perfil.pro_ends_at)}. Continuas com acesso Pro até lá.
           </p>
-          <button onClick={reativarSubscricao} style={{ padding: 10 }}>Reativar subscrição</button>
-        </div>
+          <Button onClick={reativarSubscricao}>Reativar subscrição</Button>
+        </Card>
       )}
 
-      {mensagemPlano && <p>{mensagemPlano}</p>}
+      {mensagemPlano && <p className="text-sm text-brand-muted">{mensagemPlano}</p>}
 
-      {modalProAberto && (
-        <div
-          onClick={() => setModalProAberto(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 20,
-            zIndex: 200
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'var(--background)',
-              color: 'var(--foreground)',
-              width: '100%',
-              maxWidth: 420,
-              maxHeight: '85vh',
-              overflowY: 'auto',
-              padding: 20,
-              border: '1px solid #444',
-              borderRadius: 8
-            }}
+      <Modal open={modalProAberto} onClose={() => setModalProAberto(false)}>
+        <h2 className="text-xl font-bold text-gray-900 mb-5">Freela Pro</h2>
+
+        <div className="flex gap-2.5 mb-5">
+          <button
+            onClick={() => setCicloEscolhido('mensal')}
+            className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
+              cicloEscolhido === 'mensal'
+                ? 'bg-brand-navy text-white border-2 border-brand-navy'
+                : 'bg-white text-gray-900 border border-brand-line'
+            }`}
           >
-            <h2>Freela Pro</h2>
-
-            <div style={{ display: 'flex', gap: 10, marginBottom: 15 }}>
-              <button
-                onClick={() => setCicloEscolhido('mensal')}
-                style={{
-                  flex: 1,
-                  padding: 10,
-                  border: cicloEscolhido === 'mensal' ? '2px solid #10284D' : '1px solid #444',
-                  background: cicloEscolhido === 'mensal' ? '#10284D' : 'transparent',
-                  color: cicloEscolhido === 'mensal' ? '#fff' : 'inherit',
-                  cursor: 'pointer'
-                }}
-              >
-                Mensal — 4,99 €/mês
-              </button>
-              <button
-                onClick={() => setCicloEscolhido('anual')}
-                style={{
-                  flex: 1,
-                  padding: 10,
-                  border: cicloEscolhido === 'anual' ? '2px solid #10284D' : '1px solid #444',
-                  background: cicloEscolhido === 'anual' ? '#10284D' : 'transparent',
-                  color: cicloEscolhido === 'anual' ? '#fff' : 'inherit',
-                  cursor: 'pointer'
-                }}
-              >
-                Anual — 50 €/ano
-              </button>
-            </div>
-
-            <ul style={{ paddingLeft: 20, marginBottom: 20 }}>
-              {FUNCIONALIDADES_PRO.map((funcionalidade) => (
-                <li key={funcionalidade} style={{ marginBottom: 6 }}>{funcionalidade}</li>
-              ))}
-            </ul>
-
-            {mensagemPlano && <p>{mensagemPlano}</p>}
-
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button
-                onClick={subscreverPro}
-                style={{ flex: 1, padding: 10, background: '#10284D', color: '#fff', border: 'none', cursor: 'pointer' }}
-              >
-                Subscrever Freela Pro
-              </button>
-              <button onClick={() => setModalProAberto(false)} style={{ padding: 10, cursor: 'pointer' }}>
-                Fechar
-              </button>
-            </div>
-          </div>
+            Mensal — 4,99 €/mês
+          </button>
+          <button
+            onClick={() => setCicloEscolhido('anual')}
+            className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
+              cicloEscolhido === 'anual'
+                ? 'bg-brand-navy text-white border-2 border-brand-navy'
+                : 'bg-white text-gray-900 border border-brand-line'
+            }`}
+          >
+            Anual — 50 €/ano
+          </button>
         </div>
-      )}
+
+        <ul className="list-disc pl-5 mb-6 space-y-1.5 text-sm text-gray-900">
+          {FUNCIONALIDADES_PRO.map((funcionalidade) => (
+            <li key={funcionalidade}>{funcionalidade}</li>
+          ))}
+        </ul>
+
+        {mensagemPlano && <p className="text-sm text-brand-muted mb-4">{mensagemPlano}</p>}
+
+        <div className="flex gap-2.5">
+          <Button className="flex-1" onClick={subscreverPro}>Subscrever Freela Pro</Button>
+          <Button variant="secondary" onClick={() => setModalProAberto(false)}>Fechar</Button>
+        </div>
+      </Modal>
     </div>
   )
 }

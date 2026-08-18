@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
 import { usePerfil } from '../context/PerfilContext'
+import Card from '../components/ui/Card'
+import Button from '../components/ui/Button'
+import PageTitle from '../components/ui/PageTitle'
+import Input from '../components/ui/Input'
 
 function topClientes(recibos) {
   const totaisPorCliente = {}
@@ -102,103 +106,110 @@ export default function Painel() {
 
   const clientesPrincipais = topClientes(recibos)
 
-  if (carregando) return <p style={{ padding: 20 }}>A carregar...</p>
+  if (carregando) return <p className="p-5 text-brand-muted">A carregar...</p>
 
   return (
-    <div style={{ maxWidth: 500, margin: '60px auto', padding: 20 }}>
-      <h1>Painel</h1>
-      <div style={{ padding: 15, border: '1px solid #444', marginBottom: 15 }}>
-        <p>Total faturado</p>
-        <h2>{total.toFixed(2)} €</h2>
-      </div>
-      <div style={{ padding: 15, border: '1px solid #444', marginBottom: 15 }}>
-        <p>Estimativa líquida</p>
-        <h2>{liquido.toFixed(2)} €</h2>
-      </div>
+    <div className="max-w-md mx-auto px-5 py-10">
+      <PageTitle>Painel</PageTitle>
+
+      <Card className="mb-4">
+        <p className="text-sm text-brand-muted mb-1">Total faturado</p>
+        <p className="text-2xl font-bold text-gray-900">{total.toFixed(2)} €</p>
+      </Card>
+
+      <Card className="mb-4">
+        <p className="text-sm text-brand-muted mb-1">Estimativa líquida</p>
+        <p className="text-2xl font-bold text-gray-900">{liquido.toFixed(2)} €</p>
+      </Card>
 
       {!carregandoPerfil && perfil?.is_pro && (
         <>
-          <div style={{ padding: 15, border: '1px solid #444', marginBottom: 15 }}>
-            <h3>Pôr de lado</h3>
-            <p style={{ color: '#888', fontSize: 13, marginBottom: 10 }}>Estimativas — confirma sempre com o teu contabilista.</p>
+          <Card className="mb-4">
+            <h3 className="font-semibold text-gray-900 mb-1">Pôr de lado</h3>
+            <p className="text-xs text-brand-muted mb-3">Estimativas — confirma sempre com o teu contabilista.</p>
 
-            <div style={{ padding: '8px 0', borderBottom: '1px solid #333' }}>
-              <span>IVA</span> — <strong>{ivaAPorDeLado.toFixed(2)} €</strong>
+            <div className="flex justify-between py-2 border-b border-brand-line text-sm">
+              <span className="text-brand-muted">IVA</span>
+              <strong className="text-gray-900">{ivaAPorDeLado.toFixed(2)} €</strong>
             </div>
-            <div style={{ padding: '8px 0', borderBottom: '1px solid #333' }}>
-              <span>Segurança Social</span> — <strong>{ssAPorDeLado.toFixed(2)} €</strong>
+            <div className="flex justify-between py-2 border-b border-brand-line text-sm">
+              <span className="text-brand-muted">Segurança Social</span>
+              <strong className="text-gray-900">{ssAPorDeLado.toFixed(2)} €</strong>
             </div>
-            <div style={{ padding: '8px 0', borderBottom: '1px solid #333' }}>
-              <span>Pagamentos por conta</span> — <strong style={{ color: '#888' }}>Ainda não disponível</strong>
+            <div className="flex justify-between py-2 border-b border-brand-line text-sm">
+              <span className="text-brand-muted">Pagamentos por conta</span>
+              <strong className="text-brand-muted font-normal">Ainda não disponível</strong>
             </div>
-            <div style={{ padding: '8px 0' }}>
-              <span>IRS a pagar (sem retenção)</span> — <strong>{irsSemRetencaoAPorDeLado.toFixed(2)} €</strong>
+            <div className="flex justify-between py-2 text-sm">
+              <span className="text-brand-muted">IRS a pagar (sem retenção)</span>
+              <strong className="text-gray-900">{irsSemRetencaoAPorDeLado.toFixed(2)} €</strong>
             </div>
-          </div>
+          </Card>
 
-          <div style={{ padding: 15, border: '1px solid #444', marginBottom: 15 }}>
-            <h3>Principais clientes</h3>
-            {clientesPrincipais.length === 0 && <p>Ainda não tens recibos suficientes.</p>}
+          <Card className="mb-4">
+            <h3 className="font-semibold text-gray-900 mb-2">Principais clientes</h3>
+            {clientesPrincipais.length === 0 && <p className="text-sm text-brand-muted">Ainda não tens recibos suficientes.</p>}
             {clientesPrincipais.map((c) => (
-              <div key={c.cliente} style={{ padding: '8px 0', borderBottom: '1px solid #333' }}>
-                <strong>{c.cliente}</strong> — {c.total.toFixed(2)} €
+              <div key={c.cliente} className="flex justify-between py-2 border-b border-brand-line text-sm last:border-0">
+                <strong className="text-gray-900 font-medium">{c.cliente}</strong>
+                <span className="text-gray-900">{c.total.toFixed(2)} €</span>
               </div>
             ))}
-          </div>
+          </Card>
 
-          <div style={{ padding: 15, border: '1px solid #444', marginBottom: 15 }}>
-            <h3>Despesas da atividade</h3>
-            {despesas.length === 0 && <p>Ainda não tens despesas registadas.</p>}
+          <Card className="mb-4">
+            <h3 className="font-semibold text-gray-900 mb-2">Despesas da atividade</h3>
+            {despesas.length === 0 && <p className="text-sm text-brand-muted">Ainda não tens despesas registadas.</p>}
             {despesas.map((d) => (
-              <div key={d.id} style={{ padding: '8px 0', borderBottom: '1px solid #333' }}>
-                <strong>{d.descricao}</strong> — {d.valor}€ — {d.data}
+              <div key={d.id} className="flex justify-between py-2 border-b border-brand-line text-sm last:border-0">
+                <strong className="text-gray-900 font-medium">{d.descricao}</strong>
+                <span className="text-gray-900">{d.valor}€ — {d.data}</span>
               </div>
             ))}
 
-            {mensagemDespesa && <p>{mensagemDespesa}</p>}
+            {mensagemDespesa && <p className="text-sm text-brand-muted mt-2">{mensagemDespesa}</p>}
 
             {!formDespesaAberto && (
-              <button onClick={() => setFormDespesaAberto(true)} style={{ padding: 10, marginTop: 10 }}>
+              <Button variant="secondary" className="mt-3" onClick={() => setFormDespesaAberto(true)}>
                 + Adicionar despesa
-              </button>
+              </Button>
             )}
 
             {formDespesaAberto && (
-              <div style={{ marginTop: 10 }}>
-                <input
+              <div className="mt-3 flex flex-col gap-3">
+                <Input
                   type="text"
                   placeholder="Descrição"
                   value={descricaoDespesa}
                   onChange={(e) => setDescricaoDespesa(e.target.value)}
-                  style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
                 />
-                <input
+                <Input
                   type="number"
                   placeholder="Valor (€)"
                   value={valorDespesa}
                   onChange={(e) => setValorDespesa(e.target.value)}
-                  style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
                 />
-                <input
+                <Input
                   type="date"
                   value={dataDespesa}
                   onChange={(e) => setDataDespesa(e.target.value)}
-                  style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
                 />
-                <button onClick={adicionarDespesa} style={{ padding: 10, marginRight: 10 }}>Guardar despesa</button>
-                <button onClick={() => setFormDespesaAberto(false)} style={{ padding: 10 }}>Cancelar</button>
+                <div className="flex gap-2.5">
+                  <Button className="flex-1" onClick={adicionarDespesa}>Guardar despesa</Button>
+                  <Button variant="secondary" onClick={() => setFormDespesaAberto(false)}>Cancelar</Button>
+                </div>
               </div>
             )}
-          </div>
+          </Card>
         </>
       )}
 
       {!carregandoPerfil && !perfil?.is_pro && (
-        <div style={{ padding: 15, border: '1px solid #444' }}>
-          <h3>Funcionalidades Pro</h3>
-          <p style={{ color: '#888' }}>Desbloqueia "Pôr de lado", principais clientes e despesas da atividade.</p>
-          <Link href="/perfil" style={{ color: '#10284D', fontWeight: 'bold' }}>Ver Freela Pro</Link>
-        </div>
+        <Card>
+          <h3 className="font-semibold text-gray-900 mb-1">Funcionalidades Pro</h3>
+          <p className="text-sm text-brand-muted mb-3">Desbloqueia &quot;Pôr de lado&quot;, principais clientes e despesas da atividade.</p>
+          <Link href="/perfil" className="text-brand-navy font-semibold text-sm">Ver Freela Pro</Link>
+        </Card>
       )}
     </div>
   )

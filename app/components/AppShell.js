@@ -71,7 +71,7 @@ export default function AppShell({ children }) {
   }
 
   if (verificando || !autenticado) {
-    return <p style={{ padding: 20 }}>A carregar...</p>
+    return <p className="p-5 text-brand-muted">A carregar...</p>
   }
 
   return (
@@ -84,22 +84,11 @@ export default function AppShell({ children }) {
     >
       <button
         onClick={sair}
-        style={{
-          position: 'fixed',
-          top: 15,
-          right: 15,
-          padding: '8px 14px',
-          background: '#10284D',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 6,
-          cursor: 'pointer',
-          zIndex: 100
-        }}
+        className="fixed top-4 right-4 z-100 rounded-lg border border-brand-navy px-3.5 py-2 text-sm font-medium text-brand-navy bg-white hover:bg-brand-navy-tint transition cursor-pointer"
       >
         Sair
       </button>
-      <div style={{ paddingBottom: 60 }}>
+      <div className="pb-16">
         {children}
       </div>
       <NavBar />

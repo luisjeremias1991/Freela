@@ -3,6 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import Card from '../components/ui/Card'
+import Button from '../components/ui/Button'
+import PageTitle from '../components/ui/PageTitle'
+import Label from '../components/ui/Label'
+import Input from '../components/ui/Input'
 
 // Tradução por código de erro (error.code) — cobre todos os códigos conhecidos
 // do SDK de autenticação da Supabase (auth-js), para não depender do texto em inglês.
@@ -169,25 +174,33 @@ export default function Login() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: '80px auto', padding: 20 }}>
-      <h1>Entrar</h1>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-      />
-      <input
-        type="password"
-        placeholder="Palavra-passe"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-      />
-      <button onClick={entrar} style={{ marginRight: 10, padding: 10 }}>Entrar</button>
-      <button onClick={criarConta} style={{ padding: 10 }}>Criar conta</button>
-      <p>{mensagem}</p>
+    <div className="max-w-sm mx-auto px-5 py-24">
+      <PageTitle>Entrar</PageTitle>
+
+      <Card className="flex flex-col gap-4">
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
+
+        <div>
+          <Label htmlFor="password">Palavra-passe</Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="Palavra-passe"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        <div className="flex gap-2.5">
+          <Button className="flex-1" onClick={entrar}>Entrar</Button>
+          <Button variant="secondary" className="flex-1" onClick={criarConta}>Criar conta</Button>
+        </div>
+      </Card>
+
+      {mensagem && <p className="text-sm text-brand-muted mt-4">{mensagem}</p>}
     </div>
   )
 }

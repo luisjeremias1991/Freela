@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
 import { usePerfil } from '../context/PerfilContext'
+import Card from '../components/ui/Card'
+import Button from '../components/ui/Button'
+import PageTitle from '../components/ui/PageTitle'
+import Label from '../components/ui/Label'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
 
 function estaNoPeriodo(dataStr, periodo) {
   if (periodo === 'todos') return true
@@ -222,44 +228,36 @@ export default function Recibos() {
     : recibos
 
   return (
-    <div style={{ maxWidth: 500, margin: '60px auto', padding: 20 }}>
-      <h1>Recibos</h1>
+    <div className="max-w-md mx-auto px-5 py-10">
+      <PageTitle>Recibos</PageTitle>
 
-      <div style={{ marginBottom: 30, padding: 15, border: '1px solid #444' }}>
-        <h3>Adicionar recibo</h3>
+      <Card className="mb-6 flex flex-col gap-4">
+        <h3 className="font-semibold text-gray-900 -mb-1">Adicionar recibo</h3>
 
         {templates.length > 0 && (
           <>
-            <label style={{ display: 'block', marginBottom: 4 }}>Usar template</label>
-            <select
-              value={templateSelecionadoId}
-              onChange={(e) => aplicarTemplate(e.target.value)}
-              style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-            >
-              <option value="">— Selecionar template —</option>
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.cliente} — {t.valor}€{t.retencao ? ' (com retenção)' : ''}
-                </option>
-              ))}
-            </select>
+            <div>
+              <Label htmlFor="usar-template">Usar template</Label>
+              <Select id="usar-template" value={templateSelecionadoId} onChange={(e) => aplicarTemplate(e.target.value)}>
+                <option value="">— Selecionar template —</option>
+                {templates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.cliente} — {t.valor}€{t.retencao ? ' (com retenção)' : ''}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
-            <div style={{ marginBottom: 10 }}>
+            <div className="flex flex-col">
               {templates.map((t) => (
-                <div
-                  key={t.id}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '6px 0',
-                    borderBottom: '1px solid #333'
-                  }}
-                >
-                  <span style={{ fontSize: 13, color: '#888' }}>
+                <div key={t.id} className="flex justify-between items-center py-1.5 border-b border-brand-line last:border-0">
+                  <span className="text-xs text-brand-muted">
                     {t.cliente} — {t.valor}€{t.retencao ? ' (com retenção)' : ''}
                   </span>
-                  <button onClick={() => eliminarTemplate(t.id)} style={{ padding: '4px 8px', fontSize: 12 }}>
+                  <button
+                    onClick={() => eliminarTemplate(t.id)}
+                    className="text-xs px-2 py-1 rounded-md border border-brand-line text-brand-muted hover:border-brand-navy hover:text-brand-navy transition cursor-pointer"
+                  >
                     Eliminar
                   </button>
                 </div>
@@ -268,124 +266,77 @@ export default function Recibos() {
           </>
         )}
 
-        <input
-          type="text"
-          placeholder="Cliente"
-          value={cliente}
-          onChange={(e) => setCliente(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        />
-        <input
-          type="text"
-          placeholder="NIF"
-          value={nif}
-          onChange={(e) => setNif(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        />
-        <input
-          type="number"
-          placeholder="Valor (€)"
-          value={valor}
-          onChange={(e) => setValor(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        />
-        <input
-          type="date"
-          value={data}
-          onChange={(e) => setData(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-        />
+        <Input type="text" placeholder="Cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} />
+        <Input type="text" placeholder="NIF" value={nif} onChange={(e) => setNif(e.target.value)} />
+        <Input type="number" placeholder="Valor (€)" value={valor} onChange={(e) => setValor(e.target.value)} />
+        <Input type="date" value={data} onChange={(e) => setData(e.target.value)} />
 
-        <label style={{ display: 'block', marginBottom: 10 }}>
+        <label className="flex items-center gap-2.5 text-sm text-gray-900">
           <input
             type="checkbox"
             checked={retencao}
             onChange={(e) => setRetencao(e.target.checked)}
-            style={{ marginRight: 8 }}
+            className="accent-brand-navy w-4 h-4"
           />
           Retenção na fonte
         </label>
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={adicionarRecibo} style={{ padding: 10, flex: 1 }}>Guardar recibo</button>
-          <button onClick={guardarComoTemplate} style={{ padding: 10, flex: 1 }}>
+        <div className="flex gap-2.5">
+          <Button className="flex-1" onClick={adicionarRecibo}>Guardar recibo</Button>
+          <Button variant="secondary" className="flex-1" onClick={guardarComoTemplate}>
             {templateSelecionadoId ? 'Atualizar template' : 'Guardar como template'}
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
-      <p>{mensagem}</p>
+      {mensagem && <p className="text-sm text-brand-muted mb-6 -mt-3">{mensagem}</p>}
 
       {perfil?.is_pro ? (
-        <div style={{ marginBottom: 20, padding: 15, border: '1px solid #444' }}>
-          <h3>Filtros</h3>
-          <input
+        <Card className="mb-5 flex flex-col gap-3">
+          <h3 className="font-semibold text-gray-900">Filtros</h3>
+          <Input
             type="text"
             placeholder="Pesquisar por cliente ou NIF"
             value={pesquisa}
             onChange={(e) => setPesquisa(e.target.value)}
-            style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
           />
-          <select
-            value={filtroEstado}
-            onChange={(e) => setFiltroEstado(e.target.value)}
-            style={{ display: 'block', width: '100%', marginBottom: 10, padding: 10 }}
-          >
+          <Select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
             <option value="todos">Todos os estados</option>
             <option value="pago">Pago</option>
             <option value="pendente">Pendente</option>
-          </select>
-          <select
-            value={filtroPeriodo}
-            onChange={(e) => setFiltroPeriodo(e.target.value)}
-            style={{ display: 'block', width: '100%', padding: 10 }}
-          >
+          </Select>
+          <Select value={filtroPeriodo} onChange={(e) => setFiltroPeriodo(e.target.value)}>
             <option value="todos">Todo o período</option>
             <option value="trimestre">Este trimestre</option>
             <option value="ano">Este ano</option>
-          </select>
-        </div>
+          </Select>
+        </Card>
       ) : (
         <Link
           href="/perfil"
-          style={{
-            display: 'block',
-            textAlign: 'center',
-            padding: 10,
-            marginBottom: 20,
-            border: '1px solid #444',
-            color: '#888',
-            textDecoration: 'none'
-          }}
+          className="block text-center py-2.5 mb-5 rounded-lg border border-brand-line text-brand-muted hover:border-brand-navy hover:text-brand-navy transition no-underline"
         >
           🔒 Filtros de pesquisa (Freela Pro)
         </Link>
       )}
 
       {perfil?.is_pro ? (
-        <button onClick={exportarCSV} style={{ padding: 10, marginBottom: 20 }}>Exportar CSV</button>
+        <Button variant="secondary" className="mb-5 w-full" onClick={exportarCSV}>Exportar CSV</Button>
       ) : (
         <Link
           href="/perfil"
-          style={{
-            display: 'block',
-            textAlign: 'center',
-            padding: 10,
-            marginBottom: 20,
-            border: '1px solid #444',
-            color: '#888',
-            textDecoration: 'none'
-          }}
+          className="block text-center py-2.5 mb-5 rounded-lg border border-brand-line text-brand-muted hover:border-brand-navy hover:text-brand-navy transition no-underline"
         >
           🔒 Exportar CSV (Freela Pro)
         </Link>
       )}
 
-      <h3>Os teus recibos</h3>
-      {recibosFiltrados.length === 0 && <p>Ainda não tens recibos.</p>}
+      <h3 className="font-semibold text-gray-900 mb-2">Os teus recibos</h3>
+      {recibosFiltrados.length === 0 && <p className="text-sm text-brand-muted">Ainda não tens recibos.</p>}
       {recibosFiltrados.map((r) => (
-        <div key={r.id} style={{ padding: 10, borderBottom: '1px solid #333' }}>
-          <strong>{r.cliente}</strong> — {r.valor}€ — {r.data}
+        <div key={r.id} className="flex justify-between py-2.5 border-b border-brand-line text-sm">
+          <strong className="text-gray-900 font-medium">{r.cliente}</strong>
+          <span className="text-gray-900">{r.valor}€ — {r.data}</span>
         </div>
       ))}
     </div>

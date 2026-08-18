@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
+import PageTitle from '../components/ui/PageTitle'
 
 function formatarData(d) {
   const ano = d.getFullYear()
@@ -88,14 +89,14 @@ export default function Prazos() {
     }
   }
 
-  if (carregando) return <p style={{ padding: 20 }}>A carregar...</p>
+  if (carregando) return <p className="p-5 text-brand-muted">A carregar...</p>
 
   return (
-    <div style={{ maxWidth: 500, margin: '60px auto', padding: 20 }}>
-      <h1>Prazos</h1>
-      <p style={{ color: '#888', marginBottom: 20 }}>Toca num prazo para o marcares como concluído</p>
+    <div className="max-w-md mx-auto px-5 py-10">
+      <PageTitle>Prazos</PageTitle>
+      <p className="text-sm text-brand-muted mb-5">Toca num prazo para o marcares como concluído</p>
 
-      {obrigacoes.length === 0 && <p>Ainda não tens prazos.</p>}
+      {obrigacoes.length === 0 && <p className="text-sm text-brand-muted">Ainda não tens prazos.</p>}
 
       {obrigacoes.map((o) => {
         const dias = diasQueFaltam(o.data)
@@ -103,28 +104,19 @@ export default function Prazos() {
           <div
             key={o.id}
             onClick={() => alternarDone(o)}
-            style={{
-              padding: 15,
-              borderBottom: '1px solid #333',
-              cursor: 'pointer'
-            }}
+            className="py-4 border-b border-brand-line cursor-pointer hover:bg-brand-navy-tint transition"
           >
-            <div
-              style={{
-                textDecoration: o.done ? 'line-through' : 'none',
-                color: o.done ? '#888' : 'inherit'
-              }}
-            >
-              <strong>{o.nome}</strong> — {o.data}
+            <div className={o.done ? 'line-through text-brand-muted' : 'text-gray-900'}>
+              <strong className="font-medium">{o.nome}</strong> — {o.data}
             </div>
-            <div style={{ color: '#888', fontSize: 14 }}>
+            <div className="text-xs text-brand-muted mt-0.5">
               {dias >= 0 ? `Faltam ${dias} dias` : `Atrasado ${Math.abs(dias)} dias`}
             </div>
           </div>
         )
       })}
 
-      <p>{mensagem}</p>
+      {mensagem && <p className="text-sm text-brand-muted mt-5">{mensagem}</p>}
     </div>
   )
 }
