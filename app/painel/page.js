@@ -139,7 +139,7 @@ export default function Painel() {
             <p className="text-xs text-brand-muted mb-3">Estimativas — confirma sempre com o teu contabilista.</p>
 
             <div className="flex justify-between items-center py-2 border-b border-brand-line text-sm">
-              <span className="text-brand-muted flex items-center gap-1.5">
+              <span className="text-brand-muted">
                 IVA
                 <InfoIcon
                   titulo="Limite de isenção de IVA"
@@ -149,7 +149,7 @@ export default function Painel() {
               <strong className="text-gray-900">{ivaAPorDeLado.toFixed(2)} €</strong>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-brand-line text-sm">
-              <span className="text-brand-muted flex items-center gap-1.5">
+              <span className="text-brand-muted">
                 Segurança Social
                 <InfoIcon
                   titulo="Segurança Social"
@@ -159,7 +159,7 @@ export default function Painel() {
               <strong className="text-gray-900">{ssAPorDeLado.toFixed(2)} €</strong>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-brand-line text-sm">
-              <span className="text-brand-muted flex items-center gap-1.5">
+              <span className="text-brand-muted">
                 Pagamentos por conta
                 <InfoIcon
                   titulo="Pagamentos por conta"
@@ -169,7 +169,7 @@ export default function Painel() {
               <strong className="text-brand-muted font-normal">Ainda não disponível</strong>
             </div>
             <div className="flex justify-between items-center py-2 text-sm">
-              <span className="text-brand-muted flex items-center gap-1.5">
+              <span className="text-brand-muted">
                 IRS a pagar (sem retenção)
                 <InfoIcon
                   titulo="IRS a pagar (sem retenção)"

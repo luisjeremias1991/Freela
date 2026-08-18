@@ -213,41 +213,42 @@ export default function Recibos() {
           {editandoId ? 'Editar recibo' : 'Adicionar recibo'}
         </h3>
 
-        <Input type="text" placeholder="Cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} />
+        <Input type="text" placeholder="Cliente *" value={cliente} onChange={(e) => setCliente(e.target.value)} />
         <Input type="text" placeholder="NIF" value={nif} onChange={(e) => setNif(e.target.value)} />
-        <Input type="number" placeholder="Valor (€)" value={valor} onChange={(e) => setValor(e.target.value)} />
+        <Input type="number" placeholder="Valor (€) *" value={valor} onChange={(e) => setValor(e.target.value)} />
 
         <div>
-          <Label htmlFor="data-emissao">Data de emissão</Label>
+          <Label htmlFor="data-emissao">Data de emissão *</Label>
           <Input id="data-emissao" type="date" value={dataEmissao} onChange={(e) => setDataEmissao(e.target.value)} />
         </div>
 
         <div>
-          <div className="flex items-center gap-1.5">
-            <Label htmlFor="data-pagamento">Data de pagamento</Label>
+          <Label htmlFor="data-pagamento">
+            Data de pagamento
             <InfoIcon
               titulo="Data de pagamento"
               texto="Deixa este campo vazio se ainda não recebeste. Assim que o cliente pagar, volta aqui e preenche a data — isso atualiza automaticamente o estado do recibo para &quot;Pago&quot; e ajusta os cálculos do Painel."
             />
-          </div>
+          </Label>
           <Input id="data-pagamento" type="date" value={dataPagamento} onChange={(e) => setDataPagamento(e.target.value)} />
           {!dataPagamento && <p className="text-xs text-brand-muted mt-1">Ainda não foi pago</p>}
         </div>
 
-        <div className="flex items-center gap-1.5 text-sm text-gray-900">
-          <label className="flex items-center gap-2.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={retencao}
-              onChange={(e) => setRetencao(e.target.checked)}
-              className="accent-brand-navy w-4 h-4"
-            />
-            Retenção na fonte
-          </label>
-          <InfoIcon
-            titulo="Retenção na fonte"
-            texto="Normalmente aplica-se quando o cliente é uma empresa — é ela que desconta o IRS antes de te pagar e entrega-o ao Estado. Se o cliente for um particular, muitas vezes não há retenção, e recebes o valor todo."
+        <div className="flex items-start gap-2.5 text-sm text-gray-900">
+          <input
+            id="retencao-recibo"
+            type="checkbox"
+            checked={retencao}
+            onChange={(e) => setRetencao(e.target.checked)}
+            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
           />
+          <label htmlFor="retencao-recibo" className="cursor-pointer">
+            Retenção na fonte
+            <InfoIcon
+              titulo="Retenção na fonte"
+              texto="Normalmente aplica-se quando o cliente é uma empresa — é ela que desconta o IRS antes de te pagar e entrega-o ao Estado. Se o cliente for um particular, muitas vezes não há retenção, e recebes o valor todo."
+            />
+          </label>
         </div>
 
         <div className="flex gap-2.5">
@@ -258,6 +259,8 @@ export default function Recibos() {
             <Button variant="secondary" onClick={limparFormulario}>Cancelar edição</Button>
           )}
         </div>
+
+        <p className="text-xs text-brand-muted">* Campos obrigatórios</p>
       </Card>
 
       {mensagem && <p className="text-sm text-brand-muted mb-6 -mt-3">{mensagem}</p>}

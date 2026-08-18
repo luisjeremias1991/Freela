@@ -95,43 +95,45 @@ export default function Simulador() {
           />
         </div>
 
-        <div className="flex items-center gap-1.5 text-sm text-gray-900">
-          <label className="flex items-center gap-2.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={primeiroAno}
-              onChange={(e) => setPrimeiroAno(e.target.checked)}
-              className="accent-brand-navy w-4 h-4"
-            />
-            1º ano de atividade
-          </label>
-          <InfoIcon
-            titulo="1º ano de atividade"
-            texto="No primeiro ano como trabalhador independente estás isento de pagar Segurança Social. Essa isenção acaba automaticamente a partir do 12º mês de atividade."
+        <div className="flex items-start gap-2.5 text-sm text-gray-900">
+          <input
+            id="primeiro-ano"
+            type="checkbox"
+            checked={primeiroAno}
+            onChange={(e) => setPrimeiroAno(e.target.checked)}
+            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
           />
+          <label htmlFor="primeiro-ano" className="cursor-pointer">
+            1º ano de atividade
+            <InfoIcon
+              titulo="1º ano de atividade"
+              texto="No primeiro ano como trabalhador independente estás isento de pagar Segurança Social. Essa isenção acaba automaticamente a partir do 12º mês de atividade."
+            />
+          </label>
         </div>
 
-        <div className="flex items-center gap-1.5 text-sm text-gray-900">
-          <label className="flex items-center gap-2.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={retencaoFonte}
-              onChange={(e) => setRetencaoFonte(e.target.checked)}
-              className="accent-brand-navy w-4 h-4"
-            />
-            Cliente retém na fonte
-          </label>
-          <InfoIcon
-            titulo="Retenção na fonte"
-            texto="Normalmente aplica-se quando o cliente é uma empresa — é ela que desconta o IRS antes de te pagar e entrega-o ao Estado. Se o cliente for um particular, muitas vezes não há retenção, e recebes o valor todo."
+        <div className="flex items-start gap-2.5 text-sm text-gray-900">
+          <input
+            id="retencao-fonte-simulador"
+            type="checkbox"
+            checked={retencaoFonte}
+            onChange={(e) => setRetencaoFonte(e.target.checked)}
+            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
           />
+          <label htmlFor="retencao-fonte-simulador" className="cursor-pointer">
+            Cliente retém na fonte
+            <InfoIcon
+              titulo="Retenção na fonte"
+              texto="Normalmente aplica-se quando o cliente é uma empresa — é ela que desconta o IRS antes de te pagar e entrega-o ao Estado. Se o cliente for um particular, muitas vezes não há retenção, e recebes o valor todo."
+            />
+          </label>
         </div>
       </Card>
 
       {modo === 'brutoLiquido' ? (
         <>
           <Card className="mb-4">
-            <p className="text-sm text-brand-muted mb-1 flex items-center gap-1.5">
+            <p className="text-sm text-brand-muted mb-1">
               Retenção de IRS
               <InfoIcon
                 titulo="Retenção de IRS"
@@ -142,7 +144,7 @@ export default function Simulador() {
           </Card>
 
           <Card className="mb-4">
-            <p className="text-sm text-brand-muted mb-1 flex items-center gap-1.5">
+            <p className="text-sm text-brand-muted mb-1">
               Segurança Social
               <InfoIcon
                 titulo="Segurança Social"
@@ -165,7 +167,7 @@ export default function Simulador() {
           </Card>
 
           <Card className="mb-4">
-            <p className="text-sm text-brand-muted mb-1 flex items-center gap-1.5">
+            <p className="text-sm text-brand-muted mb-1">
               Retenção de IRS
               <InfoIcon
                 titulo="Retenção de IRS"
@@ -176,7 +178,7 @@ export default function Simulador() {
           </Card>
 
           <Card>
-            <p className="text-sm text-brand-muted mb-1 flex items-center gap-1.5">
+            <p className="text-sm text-brand-muted mb-1">
               Segurança Social
               <InfoIcon
                 titulo="Segurança Social"

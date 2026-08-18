@@ -8,7 +8,7 @@ export default function InfoIcon({ titulo, texto }) {
 
   function abrir(e) {
     // Impede que o toque seja também interpretado como clique num elemento
-    // pai (ex. um checkbox ou uma linha clicável onde este ícone esteja).
+    // pai (ex. um <label> associado a um checkbox onde este ícone esteja).
     e.preventDefault()
     e.stopPropagation()
     setAberto(true)
@@ -20,7 +20,7 @@ export default function InfoIcon({ titulo, texto }) {
         type="button"
         onClick={abrir}
         aria-label={`Mais informação: ${titulo}`}
-        className="inline-flex items-center justify-center w-8 h-8 -m-1.5 rounded-full text-brand-navy cursor-pointer align-middle shrink-0"
+        className="inline-flex items-center justify-center w-8 h-8 -my-1.5 ml-1 rounded-full text-brand-navy cursor-pointer align-middle shrink-0"
       >
         <span className="w-5 h-5 rounded-full border border-brand-navy text-[11px] leading-none font-bold flex items-center justify-center">
           i
