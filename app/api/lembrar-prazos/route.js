@@ -26,11 +26,13 @@ function textoDiasQueFaltam(dias) {
 
 async function processarLembretes(request) {
   try {
-    // Rota não pública — só o agendador (ou nós, a testar) a pode chamar.
-    const authHeader = request.headers.get('authorization') || ''
-    const token = authHeader.replace('Bearer ', '').trim()
+    // Rota não pública — chamada pelo Vercel Cron (que injeta automaticamente
+    // "Authorization: Bearer <CRON_SECRET>" quando essa env var está definida no
+    // projeto) ou manualmente por nós a testar com o mesmo formato de header.
+    const authHeader = request.headers.get('authorization')
+    const cronSecret = process.env.CRON_SECRET
 
-    if (!process.env.CRON_SECRET || token !== process.env.CRON_SECRET) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
     }
 
