@@ -85,6 +85,10 @@ export default function Painel() {
   }
 
   const total = recibos.reduce((soma, r) => soma + r.valor, 0)
+  // "Recebido" é derivado de data_pagamento — se estiver preenchida, o recibo está pago.
+  const recebido = recibos
+    .filter((r) => !!r.data_pagamento)
+    .reduce((soma, r) => soma + r.valor, 0)
   // cálculo simplificado — 11,5% de IRS (só se retencao=true) + 21,4% de SS sobre 70% do valor
   const liquido = recibos.reduce((soma, r) => {
     const irs = r.retencao ? r.valor * 0.115 : 0
@@ -115,6 +119,11 @@ export default function Painel() {
       <Card className="mb-4">
         <p className="text-sm text-brand-muted mb-1">Total faturado</p>
         <p className="text-2xl font-bold text-gray-900">{total.toFixed(2)} €</p>
+      </Card>
+
+      <Card className="mb-4">
+        <p className="text-sm text-brand-muted mb-1">Total recebido</p>
+        <p className="text-2xl font-bold text-gray-900">{recebido.toFixed(2)} €</p>
       </Card>
 
       <Card className="mb-4">

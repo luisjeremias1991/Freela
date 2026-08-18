@@ -3,6 +3,10 @@
     {
       "path": "/api/lembrar-prazos",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/lembrar-cobrancas",
+      "schedule": "0 9 * * *"
     }
   ]
 }

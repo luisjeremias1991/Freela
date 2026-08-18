@@ -104,13 +104,21 @@ export default function Prazos() {
           <div
             key={o.id}
             onClick={() => alternarDone(o)}
-            className="py-4 border-b border-brand-line cursor-pointer hover:bg-brand-navy-tint transition"
+            className="flex items-center gap-3 py-4 border-b border-brand-line cursor-pointer hover:bg-brand-navy-tint transition"
           >
-            <div className={o.done ? 'line-through text-brand-muted' : 'text-gray-900'}>
-              <strong className="font-medium">{o.nome}</strong> — {o.data}
-            </div>
-            <div className="text-xs text-brand-muted mt-0.5">
-              {dias >= 0 ? `Faltam ${dias} dias` : `Atrasado ${Math.abs(dias)} dias`}
+            <span
+              aria-hidden="true"
+              className={`w-[26px] h-[26px] rounded-full border-2 border-brand-navy shrink-0 ${
+                o.done ? 'bg-brand-navy' : 'bg-white'
+              }`}
+            />
+            <div className="flex-1">
+              <div className={o.done ? 'line-through text-brand-muted' : 'text-gray-900'}>
+                <strong className="font-medium">{o.nome}</strong> — {o.data}
+              </div>
+              <div className="text-xs text-brand-muted mt-0.5">
+                {dias >= 0 ? `Faltam ${dias} dias` : `Atrasado ${Math.abs(dias)} dias`}
+              </div>
             </div>
           </div>
         )

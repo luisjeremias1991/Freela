@@ -7,7 +7,7 @@
 // - Outros pedidos GET (JS, CSS, imagens): cache primeiro, com a rede como
 //   reserva — e atualiza sempre a cache com a resposta mais recente.
 
-const NOME_CACHE = 'freela-cache-v1'
+const NOME_CACHE = 'freela-cache-v2'
 
 self.addEventListener('install', () => {
   self.skipWaiting()
@@ -34,8 +34,16 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Não guardar em cache pedidos às nossas próprias rotas de API.
   const url = new URL(request.url)
+
+  // Nunca fazer cache de pedidos a APIs externas (Supabase, etc.) — os dados são
+  // dinâmicos e uma resposta em cache ficaria desatualizada. Só fazemos cache de
+  // pedidos à própria origem da app.
+  if (url.origin !== self.location.origin) {
+    return
+  }
+
+  // Não guardar em cache pedidos às nossas próprias rotas de API.
   if (url.pathname.startsWith('/api/')) {
     return
   }

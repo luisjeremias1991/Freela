@@ -22,7 +22,7 @@ export default function NavBar() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-3 text-xs no-underline transition ${
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-3.5 min-h-11 text-xs no-underline transition ${
               ativo ? 'text-brand-navy font-semibold' : 'text-brand-muted'
             }`}
           >
