@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import NavBar from './NavBar'
+import { PerfilContext } from '../context/PerfilContext'
 
 const ROTA_PUBLICA = '/login'
 
@@ -12,6 +13,23 @@ export default function AppShell({ children }) {
   const router = useRouter()
   const [verificando, setVerificando] = useState(true)
   const [autenticado, setAutenticado] = useState(false)
+  const [userId, setUserId] = useState(null)
+  const [perfil, setPerfil] = useState(null)
+  const [carregandoPerfil, setCarregandoPerfil] = useState(true)
+
+  const carregarPerfil = useCallback(async (id) => {
+    if (!id) return null
+    setCarregandoPerfil(true)
+    const { data } = await supabase
+      .from('perfis')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+
+    setPerfil(data)
+    setCarregandoPerfil(false)
+    return data
+  }, [])
 
   useEffect(() => {
     if (pathname === ROTA_PUBLICA) {
@@ -30,7 +48,9 @@ export default function AppShell({ children }) {
         return
       }
       setAutenticado(true)
+      setUserId(user.id)
       setVerificando(false)
+      carregarPerfil(user.id)
     }
 
     verificarSessao()
@@ -38,7 +58,7 @@ export default function AppShell({ children }) {
     return () => {
       ativo = false
     }
-  }, [pathname, router])
+  }, [pathname, router, carregarPerfil])
 
   async function sair() {
     await supabase.auth.signOut()
@@ -55,7 +75,13 @@ export default function AppShell({ children }) {
   }
 
   return (
-    <>
+    <PerfilContext.Provider
+      value={{
+        perfil,
+        carregandoPerfil,
+        recarregarPerfil: () => carregarPerfil(userId)
+      }}
+    >
       <button
         onClick={sair}
         style={{
@@ -77,6 +103,6 @@ export default function AppShell({ children }) {
         {children}
       </div>
       <NavBar />
-    </>
+    </PerfilContext.Provider>
   )
 }
