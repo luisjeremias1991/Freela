@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
 import { traduzirErroAuth } from '../../lib/traduzirErroAuth'
 import Card from '../components/ui/Card'
@@ -35,15 +36,6 @@ export default function Login() {
     } else {
       setMensagem('Sessão iniciada com sucesso!')
       router.replace('/painel')
-    }
-  }
-
-  async function criarConta() {
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      setMensagem(traduzirErroAuth(error))
-    } else {
-      setMensagem('Conta criada! Verifica o teu email para confirmar.')
     }
   }
 
@@ -125,10 +117,7 @@ export default function Login() {
           />
         </div>
 
-        <div className="flex gap-2.5">
-          <Button className="flex-1" onClick={entrar}>Entrar</Button>
-          <Button variant="secondary" className="flex-1" onClick={criarConta}>Criar conta</Button>
-        </div>
+        <Button onClick={entrar}>Entrar</Button>
 
         <button
           type="button"
@@ -140,6 +129,11 @@ export default function Login() {
       </Card>
 
       {mensagem && <p className="text-sm text-brand-muted mt-4">{mensagem}</p>}
+
+      <p className="text-sm text-brand-muted mt-6 text-center">
+        Ainda não tens conta?{' '}
+        <Link href="/criar-conta" className="text-brand-navy font-semibold">Criar conta</Link>
+      </p>
     </div>
   )
 }

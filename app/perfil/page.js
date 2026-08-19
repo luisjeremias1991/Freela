@@ -45,6 +45,9 @@ export default function Perfil() {
   const [cicloEscolhido, setCicloEscolhido] = useState('mensal')
   const [mensagemPlano, setMensagemPlano] = useState('')
 
+  const [contabilistas, setContabilistas] = useState([])
+  const [carregandoContabilistas, setCarregandoContabilistas] = useState(true)
+
   async function carregarPerfil() {
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -69,8 +72,29 @@ export default function Perfil() {
     setCarregando(false)
   }
 
+  async function carregarContabilistas() {
+    setCarregandoContabilistas(true)
+
+    const { data, error } = await supabase
+      .from('contabilistas')
+      .select('*')
+      .eq('tem_slots', true)
+
+    if (error) {
+      // Antes, um erro aqui ficava completamente silencioso — a lista ficava
+      // vazia sem nenhuma pista, e parecia "às vezes funciona, às vezes não".
+      console.error('Erro ao carregar contabilistas:', error.message)
+      setContabilistas([])
+    } else {
+      setContabilistas(data || [])
+    }
+
+    setCarregandoContabilistas(false)
+  }
+
   useEffect(() => {
     carregarPerfil()
+    carregarContabilistas()
   }, [])
 
   async function guardarPerfil() {
@@ -376,6 +400,37 @@ export default function Perfil() {
           <Button variant="secondary" onClick={() => setModalProAberto(false)}>Fechar</Button>
         </div>
       </Modal>
+
+      {!carregandoContabilistas && contabilistas.length > 0 && (
+        <>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3 mt-8">Apoio</h2>
+          {contabilistas.map((contabilista) => (
+            <Card key={contabilista.id} className="mb-4">
+              <h3 className="font-semibold text-gray-900 mb-1">{contabilista.nome}</h3>
+              {contabilista.bio && <p className="text-sm text-brand-muted mb-2">{contabilista.bio}</p>}
+              {contabilista.especialidade && (
+                <p className="text-sm text-gray-900 mb-1">{contabilista.especialidade}</p>
+              )}
+              {contabilista.preco_hora != null && (
+                <p className="text-sm text-brand-muted mb-4">{contabilista.preco_hora} €/hora</p>
+              )}
+
+              {contabilista.cal_link ? (
+                <a
+                  href={contabilista.cal_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium bg-brand-navy text-white hover:opacity-90 transition cursor-pointer no-underline"
+                >
+                  Marcar reunião
+                </a>
+              ) : (
+                <p className="text-xs text-brand-muted">Ainda sem marcações disponíveis.</p>
+              )}
+            </Card>
+          ))}
+        </>
+      )}
     </div>
   )
 }

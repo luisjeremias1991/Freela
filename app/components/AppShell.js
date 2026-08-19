@@ -10,7 +10,7 @@ import { PerfilContext } from '../context/PerfilContext'
 // porque quem lá chega vem de um link de recuperação, sem ainda ter uma sessão
 // completa — se ficasse atrás da guarda normal, seria redirecionado para /login
 // antes de a sessão temporária de recuperação ter oportunidade de se estabelecer.
-const ROTAS_PUBLICAS = ['/login', '/redefinir-password']
+const ROTAS_PUBLICAS = ['/login', '/criar-conta', '/redefinir-password']
 
 export default function AppShell({ children }) {
   const pathname = usePathname()
@@ -24,11 +24,34 @@ export default function AppShell({ children }) {
   const carregarPerfil = useCallback(async (id) => {
     if (!id) return null
     setCarregandoPerfil(true)
-    const { data } = await supabase
+    let { data } = await supabase
       .from('perfis')
       .select('*')
       .eq('id', id)
       .maybeSingle()
+
+    if (!data) {
+      // Garante que toda a conta nova fica sempre com uma linha em "perfis", sem
+      // depender de a pessoa guardar algum formulário primeiro — sem isto, a
+      // lógica de redirecionamento por role não tinha nada para consultar na
+      // primeiríssima entrada (ex. uma conta de contabilista nunca chegava a ver
+      // o formulário que, de outra forma, criaria essa linha).
+      //
+      // Só corre quando o select acima já confirmou que a linha não existe —
+      // nunca por cima de uma linha já existente, para não apagar um role
+      // definido manualmente (ex. 'contabilista', atribuído à mão no Supabase).
+      const { data: perfilCriado, error: erroCriar } = await supabase
+        .from('perfis')
+        .upsert({ id, role: 'cliente' }, { onConflict: 'id' })
+        .select()
+        .maybeSingle()
+
+      if (erroCriar) {
+        console.error('Erro ao criar perfil automaticamente:', erroCriar.message)
+      } else {
+        data = perfilCriado
+      }
+    }
 
     setPerfil(data)
     setCarregandoPerfil(false)
