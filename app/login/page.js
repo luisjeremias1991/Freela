@@ -71,7 +71,10 @@ export default function Login() {
     if (error) {
       setMensagem(traduzirErroAuth(error))
     } else {
-      setMensagem('Se existir uma conta com este email, foi enviado um link de recuperação.')
+      // Volta ao ecrã de login normal com a confirmação — mesmo padrão usado para
+      // a mensagem de "?redefinida=1" depois de definir a nova password.
+      setModoRecuperacao(false)
+      setMensagem('O link de recuperação foi enviado para o teu email.')
     }
   }
 
