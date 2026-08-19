@@ -1,8 +1,39 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
+import { resend } from '../../../lib/resend'
 
 const COMISSAO_APP = 0.30
+const EMAIL_SUPORTE = process.env.EMAIL_SUPORTE || 'luis.a.jeremias@gmail.com'
+
+function formatarDataHoraPT(iso) {
+  if (!iso) return 'data desconhecida'
+  return new Date(iso).toLocaleString('pt-PT', { dateStyle: 'long', timeStyle: 'short' })
+}
+
+// Alerta best-effort: se falhar o envio, só regista no log — nunca deve impedir
+// a rota de responder à Cal.com com o erro 404 que já ia devolver de qualquer forma.
+async function enviarAlertaContabilistaNaoEncontrado(emailOrganizador, dataReuniaoIso) {
+  try {
+    const { error } = await resend.emails.send({
+      from: 'onboarding@resend.dev',
+      to: EMAIL_SUPORTE,
+      subject: 'Marcação não registada — email não encontrado',
+      html: `
+        <p>Chegou uma marcação pelo webhook da Cal.com, mas não foi encontrado nenhum contabilista com este email:</p>
+        <p><strong>${emailOrganizador}</strong></p>
+        <p>Data/hora da reunião: <strong>${formatarDataHoraPT(dataReuniaoIso)}</strong></p>
+        <p>É preciso corrigir manualmente o email na tabela "contabilistas" no Supabase.</p>
+      `
+    })
+
+    if (error) {
+      console.error('Erro ao enviar alerta de contabilista não encontrado:', error.message)
+    }
+  } catch (erro) {
+    console.error('Erro ao enviar alerta de contabilista não encontrado:', erro)
+  }
+}
 
 // A Cal.com assina o pedido com HMAC-SHA256 sobre o corpo em bruto, no header
 // "x-cal-signature-256" (em hexadecimal, por vezes com o prefixo "sha256=").
@@ -62,6 +93,7 @@ export async function POST(request) {
 
     if (erroContabilista || !contabilista) {
       console.error('Erro em cal-webhook: nenhum contabilista encontrado para o email', emailOrganizador)
+      await enviarAlertaContabilistaNaoEncontrado(emailOrganizador, dados.startTime)
       return NextResponse.json({ error: 'Contabilista não encontrado.' }, { status: 404 })
     }
 
