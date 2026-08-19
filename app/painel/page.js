@@ -22,6 +22,188 @@ function topClientes(recibos) {
     .slice(0, 3)
 }
 
+const NOMES_MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+
+const OPCOES_PERIODO_FATURACAO = [
+  { valor: '12m', rotulo: 'Últimos 12 meses' },
+  { valor: 'anoCorrente', rotulo: 'Ano corrente' },
+  { valor: '2025', rotulo: '2025' },
+  { valor: '2024', rotulo: '2024' }
+]
+
+// Gera a lista de meses (com ano, mês e se é futuro/atual) para o período
+// escolhido — os totais reais só são somados a seguir, a partir dos recibos.
+function gerarMesesDoPeriodo(periodo) {
+  const hoje = new Date()
+  const anoAtual = hoje.getFullYear()
+  const mesAtual = hoje.getMonth()
+  const meses = []
+
+  if (periodo === '12m') {
+    for (let i = 11; i >= 0; i--) {
+      const data = new Date(anoAtual, mesAtual - i, 1)
+      const ano = data.getFullYear()
+      const mes = data.getMonth()
+      meses.push({
+        ano,
+        mes,
+        chave: `${ano}-${String(mes + 1).padStart(2, '0')}`,
+        ehFuturo: false,
+        ehAtual: ano === anoAtual && mes === mesAtual
+      })
+    }
+    return meses
+  }
+
+  const ano = periodo === 'anoCorrente' ? anoAtual : parseInt(periodo, 10)
+  for (let mes = 0; mes < 12; mes++) {
+    meses.push({
+      ano,
+      mes,
+      chave: `${ano}-${String(mes + 1).padStart(2, '0')}`,
+      ehFuturo: ano === anoAtual && mes > mesAtual,
+      ehAtual: ano === anoAtual && mes === mesAtual
+    })
+  }
+  return meses
+}
+
+// Soma o "valor" dos recibos (por data_emissao) em cada mês da lista.
+function totaisPorMes(recibos, meses) {
+  const somaPorChave = {}
+  recibos.forEach((r) => {
+    if (!r.data_emissao) return
+    const chave = r.data_emissao.slice(0, 7) // 'YYYY-MM-DD' → 'YYYY-MM'
+    somaPorChave[chave] = (somaPorChave[chave] || 0) + r.valor
+  })
+
+  return meses.map((m) => ({ ...m, total: somaPorChave[m.chave] || 0 }))
+}
+
+function rotuloMes(m, periodo) {
+  const nome = NOMES_MESES[m.mes]
+  // Numa janela de 12 meses corridos há sempre duas passagens de ano — o "Jan"
+  // sozinho ficaria ambíguo, por isso ganha o ano ao lado só nesse caso.
+  if (periodo === '12m' && m.mes === 0) {
+    return `${nome} '${String(m.ano).slice(2)}`
+  }
+  return nome
+}
+
+function GraficoFaturacaoMensal({ meses, periodo }) {
+  const [mesEmFoco, setMesEmFoco] = useState(null)
+  const [verTabela, setVerTabela] = useState(false)
+
+  const maxValor = Math.max(1, ...meses.map((m) => m.total))
+  const alturaGrafico = 110
+  const larguraBarra = 18
+  const espacamento = 10
+  const larguraTotal = meses.length * (larguraBarra + espacamento)
+
+  return (
+    <div>
+      {verTabela ? (
+        <table className="w-full text-xs mb-2">
+          <thead>
+            <tr className="text-left text-brand-muted">
+              <th className="font-normal pb-1">Mês</th>
+              <th className="font-normal pb-1 text-right">Faturado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {meses.map((m) => (
+              <tr key={m.chave} className="border-t border-brand-line">
+                <td className="py-1 text-gray-900">{rotuloMes(m, periodo)} {m.ano}</td>
+                <td className="py-1 text-right text-gray-900">
+                  {m.ehFuturo ? '—' : `${m.total.toLocaleString('pt-PT', { maximumFractionDigits: 0 })} €`}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <>
+          <svg
+            viewBox={`0 0 ${larguraTotal} ${alturaGrafico + 20}`}
+            className="w-full"
+            role="img"
+            aria-label="Gráfico de barras da faturação por mês"
+          >
+            {meses.map((m, i) => {
+              const x = i * (larguraBarra + espacamento) + espacamento / 2
+              const alturaBarra = Math.max((m.total / maxValor) * alturaGrafico, m.total > 0 ? 2 : 0)
+              const y = alturaGrafico - alturaBarra
+
+              return (
+                <g key={m.chave}>
+                  {m.ehFuturo ? (
+                    <rect
+                      x={x}
+                      y={alturaGrafico - 6}
+                      width={larguraBarra}
+                      height={6}
+                      rx={2}
+                      fill="none"
+                      stroke="var(--color-brand-line)"
+                      strokeDasharray="3,2"
+                    />
+                  ) : (
+                    <rect
+                      x={x}
+                      y={y}
+                      width={larguraBarra}
+                      height={Math.max(alturaBarra, 1)}
+                      rx={4}
+                      fill={m.ehAtual ? 'var(--color-brand-navy)' : 'var(--color-brand-line)'}
+                      tabIndex={0}
+                      onMouseEnter={() => setMesEmFoco(i)}
+                      onMouseLeave={() => setMesEmFoco(null)}
+                      onFocus={() => setMesEmFoco(i)}
+                      onBlur={() => setMesEmFoco(null)}
+                      style={{ cursor: 'pointer', outline: 'none' }}
+                    >
+                      <title>{`${rotuloMes(m, periodo)} ${m.ano}: ${m.total.toLocaleString('pt-PT', { maximumFractionDigits: 0 })} €`}</title>
+                    </rect>
+                  )}
+
+                  <text
+                    x={x + larguraBarra / 2}
+                    y={alturaGrafico + 14}
+                    textAnchor="middle"
+                    fontSize="8"
+                    fill="var(--color-brand-muted)"
+                  >
+                    {rotuloMes(m, periodo)}
+                  </text>
+                </g>
+              )
+            })}
+          </svg>
+
+          <p className="text-xs text-brand-muted text-center mt-1 h-4">
+            {mesEmFoco != null && !meses[mesEmFoco].ehFuturo && (
+              <>
+                {rotuloMes(meses[mesEmFoco], periodo)} {meses[mesEmFoco].ano}:{' '}
+                <strong className="text-gray-900">
+                  {meses[mesEmFoco].total.toLocaleString('pt-PT', { maximumFractionDigits: 0 })} €
+                </strong>
+              </>
+            )}
+          </p>
+        </>
+      )}
+
+      <button
+        type="button"
+        onClick={() => setVerTabela((v) => !v)}
+        className="text-xs text-brand-navy font-medium cursor-pointer"
+      >
+        {verTabela ? 'Ver gráfico' : 'Ver como tabela'}
+      </button>
+    </div>
+  )
+}
+
 export default function Painel() {
   const { perfil, carregandoPerfil } = usePerfil()
   const [recibos, setRecibos] = useState([])
@@ -34,6 +216,11 @@ export default function Painel() {
   const [dataDespesa, setDataDespesa] = useState('')
   const [mensagemDespesa, setMensagemDespesa] = useState('')
 
+  const [contabilistas, setContabilistas] = useState([])
+  const [carregandoContabilistas, setCarregandoContabilistas] = useState(true)
+
+  const [periodoFaturacao, setPeriodoFaturacao] = useState('anoCorrente')
+
   async function carregarDespesas(userId) {
     const { data } = await supabase
       .from('despesas')
@@ -42,6 +229,24 @@ export default function Painel() {
       .order('data', { ascending: false })
 
     setDespesas(data || [])
+  }
+
+  async function carregarContabilistas() {
+    setCarregandoContabilistas(true)
+
+    const { data, error } = await supabase
+      .from('contabilistas')
+      .select('*')
+      .eq('tem_slots', true)
+
+    if (error) {
+      console.error('Erro ao carregar contabilistas:', error.message)
+      setContabilistas([])
+    } else {
+      setContabilistas(data || [])
+    }
+
+    setCarregandoContabilistas(false)
   }
 
   useEffect(() => {
@@ -57,6 +262,7 @@ export default function Painel() {
       setCarregando(false)
     }
     carregar()
+    carregarContabilistas()
   }, [])
 
   async function adicionarDespesa() {
@@ -111,6 +317,14 @@ export default function Painel() {
 
   const clientesPrincipais = topClientes(recibos)
 
+  const mesesFaturacao = totaisPorMes(recibos, gerarMesesDoPeriodo(periodoFaturacao))
+  const totalFaturacaoPeriodo = mesesFaturacao.reduce((soma, m) => soma + m.total, 0)
+  const sufixoFaturacaoPeriodo = periodoFaturacao === '12m'
+    ? '12m'
+    : periodoFaturacao === 'anoCorrente'
+      ? String(new Date().getFullYear())
+      : periodoFaturacao
+
   if (carregando) return <p className="p-5 text-brand-muted">A carregar...</p>
 
   return (
@@ -130,6 +344,37 @@ export default function Painel() {
       <Card className="mb-4">
         <p className="text-sm text-brand-muted mb-1">Estimativa líquida</p>
         <p className="text-2xl font-bold text-gray-900">{liquido.toFixed(2)} €</p>
+      </Card>
+
+      <Card className="mb-4">
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="font-semibold text-gray-900">Faturação por mês</h3>
+          <p className="text-sm text-brand-muted text-right">
+            <strong className="text-gray-900">
+              {totalFaturacaoPeriodo.toLocaleString('pt-PT', { maximumFractionDigits: 0 })} €
+            </strong>
+            {' '}/ {sufixoFaturacaoPeriodo}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          {OPCOES_PERIODO_FATURACAO.map((opcao) => (
+            <button
+              key={opcao.valor}
+              type="button"
+              onClick={() => setPeriodoFaturacao(opcao.valor)}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
+                periodoFaturacao === opcao.valor
+                  ? 'bg-brand-navy text-white'
+                  : 'bg-white text-gray-900 border border-brand-line'
+              }`}
+            >
+              {opcao.rotulo}
+            </button>
+          ))}
+        </div>
+
+        <GraficoFaturacaoMensal meses={mesesFaturacao} periodo={periodoFaturacao} />
       </Card>
 
       {!carregandoPerfil && perfil?.is_pro && (
@@ -239,11 +484,42 @@ export default function Painel() {
       )}
 
       {!carregandoPerfil && !perfil?.is_pro && (
-        <Card>
+        <Card className="mb-4">
           <h3 className="font-semibold text-gray-900 mb-1">Funcionalidades Pro</h3>
           <p className="text-sm text-brand-muted mb-3">Desbloqueia &quot;Pôr de lado&quot;, principais clientes e despesas da atividade.</p>
           <Link href="/perfil" className="text-brand-navy font-semibold text-sm">Ver Freela Pro</Link>
         </Card>
+      )}
+
+      {!carregandoContabilistas && contabilistas.length > 0 && (
+        <>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3 mt-8">Apoio</h2>
+          {contabilistas.map((contabilista) => (
+            <Card key={contabilista.id} className="mb-4">
+              <h3 className="font-semibold text-gray-900 mb-1">{contabilista.nome}</h3>
+              {contabilista.bio && <p className="text-sm text-brand-muted mb-2">{contabilista.bio}</p>}
+              {contabilista.especialidade && (
+                <p className="text-sm text-gray-900 mb-1">{contabilista.especialidade}</p>
+              )}
+              {contabilista.preco_hora != null && (
+                <p className="text-sm text-brand-muted mb-4">{contabilista.preco_hora} €/hora</p>
+              )}
+
+              {contabilista.cal_link ? (
+                <a
+                  href={contabilista.cal_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium bg-brand-navy text-white hover:opacity-90 transition cursor-pointer no-underline"
+                >
+                  Marcar reunião
+                </a>
+              ) : (
+                <p className="text-xs text-brand-muted">Ainda sem marcações disponíveis.</p>
+              )}
+            </Card>
+          ))}
+        </>
       )}
     </div>
   )
