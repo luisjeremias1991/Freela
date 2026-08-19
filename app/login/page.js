@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
@@ -23,6 +23,7 @@ export default function Login() {
 
   const [passkeyDisponivel, setPasskeyDisponivel] = useState(false)
   const [aEntrarComPasskey, setAEntrarComPasskey] = useState(false)
+  const disparoAutomaticoFeito = useRef(false)
 
   useEffect(() => {
     // Lido diretamente da URL (em vez de useSearchParams) só para não obrigar
@@ -35,21 +36,41 @@ export default function Login() {
     // O WebAuthn não deixa perguntar ao browser "há uma passkey guardada para
     // esta conta?" sem já disparar o ecrã nativo — por isso usamos a marca
     // local deixada no Perfil da última vez que uma passkey foi ativada
-    // *neste dispositivo* como sinal de que vale a pena mostrar o botão.
-    setPasskeyDisponivel(suportaPasskey() && !!obterPasskeyGuardada())
+    // *neste dispositivo* como sinal de que vale a pena tentar logo.
+    const disponivel = suportaPasskey() && !!obterPasskeyGuardada()
+    setPasskeyDisponivel(disponivel)
+
+    // Dispara o Face ID/Touch ID assim que a página abre, sem precisar de
+    // clique — o botão "Entrar com Face ID" fica só como alternativa manual
+    // (ex. se a pessoa cancelar o ecrã nativo, ou se o browser não permitir
+    // disparar sem um gesto explícito, o que acontece nalguns Safari/iOS mais
+    // antigos). "disparoAutomaticoFeito" evita repetir isto se o efeito
+    // correr duas vezes (ex. Strict Mode em desenvolvimento).
+    if (disponivel && !disparoAutomaticoFeito.current) {
+      disparoAutomaticoFeito.current = true
+      tentarEntrarComPasskey({ automatico: true })
+    }
   }, [])
 
-  async function entrarComPasskey() {
-    setMensagem('')
+  async function tentarEntrarComPasskey({ automatico }) {
+    if (!automatico) setMensagem('')
     setAEntrarComPasskey(true)
     const { error } = await supabase.auth.signInWithPasskey()
     setAEntrarComPasskey(false)
 
     if (error) {
-      setMensagem(traduzirErroAuth(error))
-    } else {
-      router.replace('/painel')
+      // Numa tentativa automática (a pessoa não pediu), uma falha ou
+      // cancelamento não deve assustar ninguém com uma mensagem de erro —
+      // fica simplesmente no formulário normal, como se nada tivesse acontecido.
+      if (!automatico) setMensagem(traduzirErroAuth(error))
+      return
     }
+
+    router.replace('/painel')
+  }
+
+  function entrarComPasskey() {
+    tentarEntrarComPasskey({ automatico: false })
   }
 
   async function entrar() {
