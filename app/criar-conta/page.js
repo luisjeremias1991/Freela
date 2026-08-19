@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
 import { traduzirErroAuth } from '../../lib/traduzirErroAuth'
+import { VERSAO_TERMOS } from '../../lib/termos'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import PageTitle from '../components/ui/PageTitle'
@@ -17,9 +18,17 @@ export default function CriarConta() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmarPassword, setConfirmarPassword] = useState('')
+  const [termosAceites, setTermosAceites] = useState(false)
   const [mensagem, setMensagem] = useState('')
 
   async function criarConta() {
+    // Segunda barreira além do "disabled" do botão — impede também um envio
+    // por Enter dentro de um campo de texto enquanto a checkbox não está marcada.
+    if (!termosAceites) {
+      setMensagem('Tens de aceitar os Termos de Uso e a Política de Privacidade para criares conta.')
+      return
+    }
+
     if (!email || !password || !confirmarPassword) {
       setMensagem('Preenche o email e a palavra-passe.')
       return
@@ -37,15 +46,24 @@ export default function CriarConta() {
       return
     }
 
-    // Nome é opcional — se preenchido, guarda-o já no perfil. Não bloqueia a
-    // criação da conta nem o redirecionamento se isto falhar por algum motivo.
-    if (nome && data.user) {
-      const { error: erroNome } = await supabase
+    // Nome é opcional — só entra no upsert se preenchido. A aceitação dos
+    // termos, pelo contrário, é sempre gravada (data + versão do texto),
+    // como prova de quando e o que exatamente cada pessoa aceitou.
+    if (data.user) {
+      const { error: erroPerfil } = await supabase
         .from('perfis')
-        .upsert({ id: data.user.id, nome }, { onConflict: 'id' })
+        .upsert(
+          {
+            id: data.user.id,
+            ...(nome ? { nome } : {}),
+            termos_aceites_em: new Date().toISOString(),
+            termos_versao: VERSAO_TERMOS
+          },
+          { onConflict: 'id' }
+        )
 
-      if (erroNome) {
-        console.error('Erro ao guardar o nome no perfil:', erroNome.message)
+      if (erroPerfil) {
+        console.error('Erro ao guardar o perfil:', erroPerfil.message)
       }
     }
 
@@ -92,7 +110,42 @@ export default function CriarConta() {
           />
         </div>
 
-        <Button onClick={criarConta}>Criar conta</Button>
+        <div className="flex items-start gap-2.5 text-sm text-gray-900">
+          <input
+            id="termos"
+            type="checkbox"
+            checked={termosAceites}
+            onChange={(e) => setTermosAceites(e.target.checked)}
+            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
+          />
+          <label htmlFor="termos" className="cursor-pointer">
+            Li e aceito os{' '}
+            <Link
+              href="/termos"
+              target="_blank"
+              rel="noopener noreferrer"
+              // Impede que o clique no link também seja interpretado como
+              // clique no <label> (o que alternaria a checkbox sem a pessoa
+              // querer) — mesmo cuidado já aplicado ao InfoIcon dentro de labels.
+              onClick={(e) => e.stopPropagation()}
+              className="text-brand-navy font-semibold"
+            >
+              Termos de Uso
+            </Link>{' '}
+            e a{' '}
+            <Link
+              href="/privacidade"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-brand-navy font-semibold"
+            >
+              Política de Privacidade
+            </Link>
+          </label>
+        </div>
+
+        <Button onClick={criarConta} disabled={!termosAceites}>Criar conta</Button>
       </Card>
 
       {mensagem && <p className="text-sm text-brand-muted mt-4">{mensagem}</p>}

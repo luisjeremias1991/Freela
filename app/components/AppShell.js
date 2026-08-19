@@ -10,7 +10,7 @@ import { PerfilContext } from '../context/PerfilContext'
 // porque quem lá chega vem de um link de recuperação, sem ainda ter uma sessão
 // completa — se ficasse atrás da guarda normal, seria redirecionado para /login
 // antes de a sessão temporária de recuperação ter oportunidade de se estabelecer.
-const ROTAS_PUBLICAS = ['/login', '/criar-conta', '/redefinir-password']
+const ROTAS_PUBLICAS = ['/login', '/criar-conta', '/redefinir-password', '/termos', '/privacidade']
 
 export default function AppShell({ children }) {
   const pathname = usePathname()
