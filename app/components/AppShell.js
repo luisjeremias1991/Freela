@@ -130,7 +130,7 @@ export default function AppShell({ children }) {
       >
         Sair
       </button>
-      <div className="pb-16">
+      <div className="pb-20">
         {children}
       </div>
       {perfil?.role !== 'contabilista' && <NavBar />}
