@@ -50,35 +50,18 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Payload sem email de organizador.' }, { status: 400 })
     }
 
-    // A tabela "contabilistas" não guarda email — só existe na autenticação da
-    // Supabase. Identificamos a conta pelo email do organizador da reunião.
-    const { data: listaUtilizadores, error: erroUtilizadores } = await supabaseAdmin.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000
-    })
-
-    if (erroUtilizadores) {
-      console.error('Erro em cal-webhook (a listar utilizadores):', erroUtilizadores.message)
-      return NextResponse.json({ error: erroUtilizadores.message }, { status: 500 })
-    }
-
-    const utilizador = listaUtilizadores.users.find(
-      (u) => u.email?.toLowerCase() === emailOrganizador.toLowerCase()
-    )
-
-    if (!utilizador) {
-      console.error('Erro em cal-webhook: nenhuma conta encontrada para o email', emailOrganizador)
-      return NextResponse.json({ error: 'Contabilista não encontrado.' }, { status: 404 })
-    }
-
+    // O email já está guardado diretamente em "contabilistas" — não depende mais
+    // de ir procurar a conta em auth.users. ilike faz a comparação sem distinguir
+    // maiúsculas/minúsculas (sem usar wildcards, um email não costuma conter
+    // "%"/"_", por isso comporta-se aqui como uma igualdade insensível a maiúsculas).
     const { data: contabilista, error: erroContabilista } = await supabaseAdmin
       .from('contabilistas')
       .select('*')
-      .eq('id', utilizador.id)
+      .ilike('email', emailOrganizador)
       .maybeSingle()
 
     if (erroContabilista || !contabilista) {
-      console.error('Erro em cal-webhook: conta sem perfil de contabilista associado:', emailOrganizador)
+      console.error('Erro em cal-webhook: nenhum contabilista encontrado para o email', emailOrganizador)
       return NextResponse.json({ error: 'Contabilista não encontrado.' }, { status: 404 })
     }
 

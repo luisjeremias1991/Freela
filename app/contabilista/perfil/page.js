@@ -18,6 +18,7 @@ const ESPECIALIDADES = [
 
 export default function PerfilContabilista() {
   const [nome, setNome] = useState('')
+  const [email, setEmail] = useState('')
   const [bio, setBio] = useState('')
   const [especialidade, setEspecialidade] = useState(ESPECIALIDADES[0])
   const [precoHora, setPrecoHora] = useState('')
@@ -27,6 +28,10 @@ export default function PerfilContabilista() {
 
   async function carregarPerfil() {
     const { data: { user } } = await supabase.auth.getUser()
+
+    // O email é sempre o da conta autenticada — não vem do formulário nem é
+    // editável, precisamente para nunca desalinhar do email usado no Cal.com.
+    setEmail(user.email || '')
 
     const { data: perfil, error } = await supabase
       .from('contabilistas')
@@ -60,6 +65,7 @@ export default function PerfilContabilista() {
     const { error } = await supabase.from('contabilistas').upsert({
       id: user.id,
       nome: nome,
+      email: user.email || null,
       bio: bio || null,
       especialidade: especialidade,
       preco_hora: precoHora ? parseFloat(precoHora) : null,
@@ -83,6 +89,20 @@ export default function PerfilContabilista() {
         <div>
           <Label htmlFor="nome">Nome</Label>
           <Input id="nome" type="text" placeholder="Nome" value={nome} onChange={(e) => setNome(e.target.value)} />
+        </div>
+
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            readOnly
+            className="bg-gray-50 text-brand-muted cursor-not-allowed"
+          />
+          <p className="text-xs text-brand-muted mt-1">
+            É o email da tua conta — tem de ser o mesmo que usas no Cal.com.
+          </p>
         </div>
 
         <div>
