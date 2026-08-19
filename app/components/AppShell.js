@@ -6,7 +6,11 @@ import { supabase } from '../../lib/supabase'
 import NavBar from './NavBar'
 import { PerfilContext } from '../context/PerfilContext'
 
-const ROTA_PUBLICA = '/login'
+// Rotas acessíveis sem sessão normal. "/redefinir-password" tem de estar aqui
+// porque quem lá chega vem de um link de recuperação, sem ainda ter uma sessão
+// completa — se ficasse atrás da guarda normal, seria redirecionado para /login
+// antes de a sessão temporária de recuperação ter oportunidade de se estabelecer.
+const ROTAS_PUBLICAS = ['/login', '/redefinir-password']
 
 export default function AppShell({ children }) {
   const pathname = usePathname()
@@ -32,7 +36,7 @@ export default function AppShell({ children }) {
   }, [])
 
   useEffect(() => {
-    if (pathname === ROTA_PUBLICA) {
+    if (ROTAS_PUBLICAS.includes(pathname)) {
       setVerificando(false)
       return
     }
@@ -50,7 +54,22 @@ export default function AppShell({ children }) {
       setAutenticado(true)
       setUserId(user.id)
       setVerificando(false)
-      carregarPerfil(user.id)
+      carregarPerfil(user.id).then((perfilCarregado) => {
+        if (!ativo) return
+        const ehContabilista = perfilCarregado?.role === 'contabilista'
+
+        // Contas de contabilista têm uma experiência própria — por agora, só a
+        // página de perfil deles. Redireciona sempre que tentarem ir a outro lado.
+        if (ehContabilista && pathname !== '/contabilista/perfil') {
+          router.replace('/contabilista/perfil')
+        }
+
+        // E no sentido inverso: uma conta de cliente não deve conseguir aceder
+        // à página de perfil de contabilista.
+        if (!ehContabilista && pathname === '/contabilista/perfil') {
+          router.replace('/painel')
+        }
+      })
     }
 
     verificarSessao()
@@ -65,8 +84,8 @@ export default function AppShell({ children }) {
     router.replace('/login')
   }
 
-  // Página de login: sem guarda, sem barra de navegação, sem botão de sair.
-  if (pathname === ROTA_PUBLICA) {
+  // Rotas públicas: sem guarda, sem barra de navegação, sem botão de sair.
+  if (ROTAS_PUBLICAS.includes(pathname)) {
     return <>{children}</>
   }
 
@@ -91,7 +110,7 @@ export default function AppShell({ children }) {
       <div className="pb-16">
         {children}
       </div>
-      <NavBar />
+      {perfil?.role !== 'contabilista' && <NavBar />}
     </PerfilContext.Provider>
   )
 }

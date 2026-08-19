@@ -52,6 +52,16 @@ export async function POST(request) {
         user_id: user.id,
         ciclo: ciclo
       },
+      // Sem isto, o "metadata" só fica na Checkout Session — a Stripe não o copia
+      // automaticamente para a Subscription resultante. Sem o metadata na própria
+      // subscrição, eventos como customer.subscription.updated/deleted não têm
+      // forma direta de saber a que utilizador pertencem.
+      subscription_data: {
+        metadata: {
+          user_id: user.id,
+          ciclo: ciclo
+        }
+      },
       success_url: `${origin}/perfil?checkout=sucesso`,
       cancel_url: `${origin}/perfil?checkout=cancelado`
     })
