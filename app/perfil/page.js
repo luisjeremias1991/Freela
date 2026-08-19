@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
+import { traduzirErroAuth } from '../../lib/traduzirErroAuth'
+import { suportaPasskey, obterPasskeyGuardada, guardarPasskey, limparPasskeyGuardada } from '../../lib/passkey'
 import { usePerfil } from '../context/PerfilContext'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -44,6 +46,54 @@ export default function Perfil() {
   const [modalProAberto, setModalProAberto] = useState(false)
   const [cicloEscolhido, setCicloEscolhido] = useState('mensal')
   const [mensagemPlano, setMensagemPlano] = useState('')
+
+  const [passkeySuportada, setPasskeySuportada] = useState(false)
+  const [passkeyAtiva, setPasskeyAtiva] = useState(false)
+  const [aProcessarPasskey, setAProcessarPasskey] = useState(false)
+  const [mensagemPasskey, setMensagemPasskey] = useState('')
+
+  useEffect(() => {
+    // Só se sabe com certeza depois de montar (depende de window/navigator),
+    // por isso começa sempre a false para não desalinhar a 1ª renderização
+    // no servidor com a do browser.
+    setPasskeySuportada(suportaPasskey())
+    setPasskeyAtiva(!!obterPasskeyGuardada())
+  }, [])
+
+  async function ativarPasskey() {
+    setMensagemPasskey('')
+    setAProcessarPasskey(true)
+    const { data, error } = await supabase.auth.registerPasskey()
+    setAProcessarPasskey(false)
+
+    if (error) {
+      setMensagemPasskey(traduzirErroAuth(error))
+      return
+    }
+
+    guardarPasskey(data.id)
+    setPasskeyAtiva(true)
+    setMensagemPasskey('Face ID / Touch ID ativado com sucesso neste dispositivo!')
+  }
+
+  async function desativarPasskey() {
+    const passkeyId = obterPasskeyGuardada()
+    if (!passkeyId) return
+
+    setMensagemPasskey('')
+    setAProcessarPasskey(true)
+    const { error } = await supabase.auth.passkey.delete({ passkeyId })
+    setAProcessarPasskey(false)
+
+    if (error) {
+      setMensagemPasskey(traduzirErroAuth(error))
+      return
+    }
+
+    limparPasskeyGuardada()
+    setPasskeyAtiva(false)
+    setMensagemPasskey('Face ID / Touch ID desativado neste dispositivo.')
+  }
 
   async function carregarPerfil() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -305,6 +355,41 @@ export default function Perfil() {
       </Card>
 
       {mensagem && <p className="text-sm text-brand-muted mb-8 -mt-4">{mensagem}</p>}
+
+      <h2 className="text-lg font-semibold text-gray-900 mb-3">Acesso rápido</h2>
+      <Card className="mb-8">
+        <h3 className="font-semibold text-gray-900 mb-1">Face ID / Touch ID</h3>
+
+        {!passkeySuportada && (
+          <p className="text-sm text-brand-muted">
+            O teu dispositivo ou navegador não suporta este tipo de acesso.
+          </p>
+        )}
+
+        {passkeySuportada && passkeyAtiva && (
+          <>
+            <p className="text-sm text-brand-muted mb-4">
+              Já podes entrar neste dispositivo com Face ID ou Touch ID, sem escreveres a palavra-passe.
+            </p>
+            <Button variant="secondary" onClick={desativarPasskey} disabled={aProcessarPasskey}>
+              {aProcessarPasskey ? 'A desativar...' : 'Desativar neste dispositivo'}
+            </Button>
+          </>
+        )}
+
+        {passkeySuportada && !passkeyAtiva && (
+          <>
+            <p className="text-sm text-brand-muted mb-4">
+              Ativa o Face ID ou Touch ID para entrares mais depressa neste dispositivo, sem escreveres a palavra-passe sempre que abres a app.
+            </p>
+            <Button onClick={ativarPasskey} disabled={aProcessarPasskey}>
+              {aProcessarPasskey ? 'A ativar...' : 'Ativar Face ID / Touch ID neste dispositivo'}
+            </Button>
+          </>
+        )}
+
+        {mensagemPasskey && <p className="text-sm text-brand-muted mt-4">{mensagemPasskey}</p>}
+      </Card>
 
       <h2 className="text-lg font-semibold text-gray-900 mb-3">Plano</h2>
       {carregandoPerfil && <p className="text-sm text-brand-muted">A carregar plano...</p>}

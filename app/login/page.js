@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
 import { traduzirErroAuth } from '../../lib/traduzirErroAuth'
+import { suportaPasskey, obterPasskeyGuardada } from '../../lib/passkey'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import PageTitle from '../components/ui/PageTitle'
@@ -20,6 +21,9 @@ export default function Login() {
   const [modoRecuperacao, setModoRecuperacao] = useState(false)
   const [emailRecuperacao, setEmailRecuperacao] = useState('')
 
+  const [passkeyDisponivel, setPasskeyDisponivel] = useState(false)
+  const [aEntrarComPasskey, setAEntrarComPasskey] = useState(false)
+
   useEffect(() => {
     // Lido diretamente da URL (em vez de useSearchParams) só para não obrigar
     // esta página a precisar de um limite <Suspense>.
@@ -27,7 +31,26 @@ export default function Login() {
     if (parametros.get('redefinida') === '1') {
       setMensagem('Palavra-passe redefinida com sucesso! Já podes entrar com a nova palavra-passe.')
     }
+
+    // O WebAuthn não deixa perguntar ao browser "há uma passkey guardada para
+    // esta conta?" sem já disparar o ecrã nativo — por isso usamos a marca
+    // local deixada no Perfil da última vez que uma passkey foi ativada
+    // *neste dispositivo* como sinal de que vale a pena mostrar o botão.
+    setPasskeyDisponivel(suportaPasskey() && !!obterPasskeyGuardada())
   }, [])
+
+  async function entrarComPasskey() {
+    setMensagem('')
+    setAEntrarComPasskey(true)
+    const { error } = await supabase.auth.signInWithPasskey()
+    setAEntrarComPasskey(false)
+
+    if (error) {
+      setMensagem(traduzirErroAuth(error))
+    } else {
+      router.replace('/painel')
+    }
+  }
 
   async function entrar() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -99,6 +122,19 @@ export default function Login() {
   return (
     <div className="max-w-sm mx-auto px-5 py-24">
       <PageTitle>Entrar</PageTitle>
+
+      {passkeyDisponivel && (
+        <>
+          <Button onClick={entrarComPasskey} disabled={aEntrarComPasskey} className="w-full mb-3">
+            {aEntrarComPasskey ? 'A entrar...' : '🔐 Entrar com Face ID'}
+          </Button>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-brand-line" />
+            <span className="text-xs text-brand-muted">ou entra com email e palavra-passe</span>
+            <div className="flex-1 h-px bg-brand-line" />
+          </div>
+        </>
+      )}
 
       <Card className="flex flex-col gap-4">
         <div>
