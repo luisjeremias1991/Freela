@@ -287,7 +287,7 @@ export default function Recibos() {
         </Card>
       ) : (
         <Link
-          href="/perfil"
+          href="/perfil#plano"
           className="block text-center py-2.5 mb-5 rounded-lg border border-brand-line text-brand-muted hover:border-brand-primary hover:text-brand-primary transition no-underline"
         >
           🔒 Filtros de pesquisa (Recibos Claros Pro)
@@ -298,7 +298,7 @@ export default function Recibos() {
         <Button variant="secondary" className="mb-5 w-full" onClick={exportarCSV}>Exportar CSV</Button>
       ) : (
         <Link
-          href="/perfil"
+          href="/perfil#plano"
           className="block text-center py-2.5 mb-5 rounded-lg border border-brand-line text-brand-muted hover:border-brand-primary hover:text-brand-primary transition no-underline"
         >
           🔒 Exportar CSV (Recibos Claros Pro)

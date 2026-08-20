@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
+import { usePerfil } from '../context/PerfilContext'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import PageTitle from '../components/ui/PageTitle'
@@ -35,6 +36,7 @@ function chaveMesAtual() {
 }
 
 export default function Orcamento() {
+  const { perfil, carregandoPerfil } = usePerfil()
   const [despesas, setDespesas] = useState([])
   const [carregando, setCarregando] = useState(true)
 
@@ -116,7 +118,28 @@ export default function Orcamento() {
     .filter((c) => c.total > 0)
     .sort((a, b) => b.total - a.total)
 
-  if (carregando) return <p className="p-5 text-brand-muted">A carregar...</p>
+  if (carregando || carregandoPerfil) return <p className="p-5 text-brand-muted">A carregar...</p>
+
+  // Orçamento pessoal é Recibos Claros Pro — bloqueio à entrada da página
+  // inteira, para quem chegar aqui diretamente por URL sem passar pelo cartão
+  // do Painel (que já nem mostra o link a quem não é Pro).
+  if (!perfil?.is_pro) {
+    return (
+      <div className="max-w-md mx-auto px-5 py-10">
+        <Link href="/painel" className="inline-block text-sm text-brand-primary font-semibold mb-5">
+          ← Voltar ao Painel
+        </Link>
+        <PageTitle>Orçamento pessoal</PageTitle>
+        <Card>
+          <h3 className="font-semibold text-gray-900 mb-1">Funcionalidade Recibos Claros Pro</h3>
+          <p className="text-sm text-brand-muted mb-4">
+            Vê quanto te sobra mesmo este mês, depois de impostos e despesas pessoais, com o Orçamento pessoal.
+          </p>
+          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver Recibos Claros Pro</Link>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-md mx-auto px-5 py-10">

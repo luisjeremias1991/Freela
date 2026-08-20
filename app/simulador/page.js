@@ -10,9 +10,8 @@ import Input from '../components/ui/Input'
 import InfoIcon from '../components/ui/InfoIcon'
 
 export default function Simulador() {
-  const { perfil } = usePerfil()
+  const { perfil, carregandoPerfil } = usePerfil()
   const [modo, setModo] = useState('brutoLiquido') // 'brutoLiquido' | 'liquidoBruto'
-  const [mostrarUpsell, setMostrarUpsell] = useState(false)
 
   const [valor, setValor] = useState('')
   const [primeiroAno, setPrimeiroAno] = useState(true)
@@ -25,7 +24,6 @@ export default function Simulador() {
 
   // Mesmas taxas usadas nos dois modos, para o cálculo inverso dar sempre o valor esperado.
   const taxaIrs = primeiroAno ? 0.25 : 0.115
-  const taxaRetencao = retencaoFonte ? taxaIrs : 0
   const taxaSS = primeiroAno ? 0 : 0.70 * 0.214
 
   // "Valor da proposta" / "Valor bruto necessário" são sempre valores SEM
@@ -34,14 +32,15 @@ export default function Simulador() {
   // parte, e lê perfil.regime_iva em vez de assumir isento por omissão.
   const taxaIva = perfil?.regime_iva === 'normal' ? 0.23 : 0
 
+  // "Bruto → Líquido" é grátis, sempre acessível. Só "Líquido → Bruto" é
+  // Recibos Claros Pro — mas o próprio botão/pill fica sempre visível e
+  // clicável para todos (é o formulário que fica escondido atrás do
+  // bloqueio, nunca a opção em si, senão quem é grátis nem sabe que existe).
   function selecionarModo(novoModo) {
-    if (novoModo === 'liquidoBruto' && !perfil?.is_pro) {
-      setMostrarUpsell(true)
-      return
-    }
-    setMostrarUpsell(false)
     setModo(novoModo)
   }
+
+  const modoBloqueado = modo === 'liquidoBruto' && !perfil?.is_pro
 
   const valorNum = parseFloat(valor) || 0
 
@@ -73,12 +72,25 @@ export default function Simulador() {
     ? `${valorNum.toFixed(2)} € − ${ivaAEntregar.toFixed(2)} € (IVA) − ${irs.toFixed(2)} € (IRS) − ${ss.toFixed(2)} € (SS)`
     : `${valorNum.toFixed(2)} € − ${irs.toFixed(2)} € (IRS) − ${ss.toFixed(2)} € (SS)`
 
-  // Modo Líquido → Bruto: bruto = liquido / (1 - taxaRetencao - taxaSS)
-  const divisor = 1 - taxaRetencao - taxaSS
+  // Modo Líquido → Bruto: bruto = líquido / (1 − taxaIrs − taxaSS). IRS entra
+  // sempre no divisor, retido ou não — mesma correção do outro modo: a
+  // retenção não muda SE é devido, só QUEM já o entregou ao Estado.
+  const divisor = 1 - taxaIrs - taxaSS
   const brutoNecessario = divisor > 0 ? valorNum / divisor : 0
   const ivaSobreBruto = brutoNecessario * taxaIva
-  const irsSobreBruto = brutoNecessario * taxaRetencao
+  const totalFaturaBruto = brutoNecessario + ivaSobreBruto
+  const irsSobreBruto = brutoNecessario * taxaIrs
   const ssSobreBruto = brutoNecessario * taxaSS
+
+  // Fórmula de apoio por baixo do "Valor a faturar" — cadeia completa, do
+  // líquido desejado (o que a pessoa escreveu) até ao valor final a pedir ao
+  // cliente. Quando há IVA, passa pelo valor sem IVA como etapa intermédia;
+  // quando isento, salta direto para o total (que é o mesmo valor).
+  const formulaBruto = taxaIva > 0
+    ? `${valorNum.toFixed(2)} € (líquido desejado) + ${irsSobreBruto.toFixed(2)} € (IRS) + ${ssSobreBruto.toFixed(2)} € (SS) = ${brutoNecessario.toFixed(2)} € (sem IVA) + ${ivaSobreBruto.toFixed(2)} € (IVA) = ${totalFaturaBruto.toFixed(2)} € (a faturar)`
+    : `${valorNum.toFixed(2)} € (líquido desejado) + ${irsSobreBruto.toFixed(2)} € (IRS) + ${ssSobreBruto.toFixed(2)} € (SS) = ${totalFaturaBruto.toFixed(2)} € (a faturar)`
+
+  if (carregandoPerfil) return <p className="p-5 text-brand-muted">A carregar...</p>
 
   return (
     <div className="max-w-md mx-auto px-5 py-10">
@@ -107,15 +119,17 @@ export default function Simulador() {
         </button>
       </div>
 
-      {mostrarUpsell && (
-        <Card className="mb-5">
-          <p className="text-sm text-gray-900">
-            O simulador inverso (líquido → bruto) é uma funcionalidade Recibos Claros Pro.{' '}
-            <Link href="/perfil" className="text-brand-primary font-semibold">Subscreve aqui</Link> para o desbloqueares.
+      {modoBloqueado ? (
+        <Card>
+          <h3 className="font-semibold text-gray-900 mb-1">Funcionalidade Recibos Claros Pro</h3>
+          <p className="text-sm text-brand-muted mb-4">
+            O simulador inverso (líquido → bruto) está disponível no plano Pro — calcula quanto tens de faturar
+            para atingir o líquido que queres receber.
           </p>
+          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver Recibos Claros Pro</Link>
         </Card>
-      )}
-
+      ) : (
+      <>
       <Card className="mb-8 flex flex-col gap-4">
         <div>
           <Label htmlFor="valor-simulador">
@@ -256,43 +270,63 @@ export default function Simulador() {
         </>
       ) : (
         <>
-          <Card className="mb-4">
-            <p className="text-sm text-brand-muted mb-1">Valor bruto necessário</p>
-            <p className="text-2xl font-bold text-gray-900">{brutoNecessario.toFixed(2)} €</p>
-          </Card>
-
           {taxaIva > 0 && (
-            <Card className="mb-4">
-              <p className="text-sm text-brand-muted mb-1">IVA a entregar</p>
-              <p className="text-2xl font-bold text-gray-900">{ivaSobreBruto.toFixed(2)} €</p>
+            <div className="mb-6">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-brand-muted mb-2">
+                O que vais faturar
+              </h3>
+              <Card className="bg-brand-navy-tint">
+                <div className="flex justify-between items-center py-1.5 border-b border-brand-line text-sm">
+                  <span className="text-brand-muted">Valor sem IVA</span>
+                  <span className="text-gray-900">{brutoNecessario.toFixed(2)} €</span>
+                </div>
+                <div className="flex justify-between items-center py-1.5 text-sm">
+                  <span className="text-brand-muted">IVA (23%)</span>
+                  <span className="text-gray-900">{ivaSobreBruto.toFixed(2)} €</span>
+                </div>
+              </Card>
               <p className="text-xs text-brand-muted mt-2">
-                Este valor não é teu — cobra-se ao cliente e entrega-se ao Estado, à parte do que ficas a ganhar.
+                O IVA não é teu — cobra-se ao cliente e entrega-se ao Estado, à parte do que ficas a ganhar.
               </p>
-            </Card>
+            </div>
           )}
 
-          <Card className="mb-4">
-            <p className="text-sm text-brand-muted mb-1">
-              Retenção de IRS
-              <InfoIcon
-                titulo="Retenção de IRS"
-                texto="É o valor que o cliente desconta logo no recibo e entrega diretamente ao Estado, por tua conta. No fim do ano, conta como um adiantamento do teu IRS."
-              />
-            </p>
-            <p className="text-2xl font-bold text-gray-900">{irsSobreBruto.toFixed(2)} €</p>
-          </Card>
+          <div className="flex gap-2.5 mb-4">
+            <Card className="flex-1">
+              <p className="text-xs text-brand-muted mb-1">
+                {retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
+                <InfoIcon
+                  titulo={retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
+                  texto={
+                    retencaoFonte
+                      ? 'Já entregue pelo cliente ao Estado — não chega a ser depositado na tua conta.'
+                      : 'Este valor chega à tua conta agora, mas continua a ser devido — vais ter de o pagar depois (na declaração de IRS ou em pagamentos por conta).'
+                  }
+                />
+              </p>
+              <p className="text-lg font-semibold text-gray-900">{irsSobreBruto.toFixed(2)} €</p>
+            </Card>
 
-          <Card>
-            <p className="text-sm text-brand-muted mb-1">
-              Segurança Social
-              <InfoIcon
-                titulo="Segurança Social"
-                texto="É a tua contribuição mensal que te dá direito a subsídios e à reforma no futuro. Calcula-se sobre 70% da tua faturação, não sobre o valor todo."
-              />
-            </p>
-            <p className="text-2xl font-bold text-gray-900">{ssSobreBruto.toFixed(2)} €</p>
+            <Card className="flex-1">
+              <p className="text-xs text-brand-muted mb-1">
+                Segurança Social
+                <InfoIcon
+                  titulo="Segurança Social"
+                  texto="É a tua contribuição mensal que te dá direito a subsídios e à reforma no futuro. Calcula-se sobre 70% da tua faturação, não sobre o valor todo."
+                />
+              </p>
+              <p className="text-lg font-semibold text-gray-900">{ssSobreBruto.toFixed(2)} €</p>
+            </Card>
+          </div>
+
+          <Card className="border-2 border-brand-primary">
+            <p className="text-sm text-brand-muted mb-1">Valor a faturar</p>
+            <p className="text-5xl font-bold text-brand-primary">{totalFaturaBruto.toFixed(2)} €</p>
+            <p className="text-xs text-brand-muted mt-3">{formulaBruto}</p>
           </Card>
         </>
+      )}
+      </>
       )}
     </div>
   )

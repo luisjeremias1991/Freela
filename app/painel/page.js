@@ -270,10 +270,15 @@ export default function Painel() {
   async function carregarContabilistas() {
     setCarregandoContabilistas(true)
 
+    // "Disponibilidade aberta" = mesmo marcável, não só marcado como
+    // "tem_slots". Um contabilista com tem_slots=true mas sem cal_link ainda
+    // não tem forma de ser contactado — não deve aparecer em "Apoio" (nem o
+    // cartão, nem só o botão).
     const { data, error } = await supabase
       .from('contabilistas')
       .select('*')
       .eq('tem_slots', true)
+      .not('cal_link', 'is', null)
 
     if (error) {
       console.error('Erro ao carregar contabilistas:', error.message)
@@ -376,8 +381,8 @@ export default function Painel() {
   if (pagamentosPorConta > 0) componentesSubtraidosLucro.push('Pagamentos por conta')
   const textoSubtracaoLucro = `Recebido menos ${juntarComE(componentesSubtraidosLucro)}`
 
-  // "Sobra real este mês" — cartão do Orçamento pessoal, disponível no plano
-  // Grátis. Ao contrário do cartão "Pôr de lado" (Pro, acumulado desde sempre),
+  // "Sobra real este mês" — cartão do Orçamento pessoal, Recibos Claros Pro.
+  // Ao contrário do cartão "Pôr de lado" (também Pro, acumulado desde sempre),
   // este é sempre reduzido ao mês corrente: só recibos efetivamente recebidos
   // este mês, a fatia desses recibos que ainda terás de pôr de lado para
   // impostos, e as despesas pessoais lançadas este mês.
@@ -460,14 +465,26 @@ export default function Painel() {
         <GraficoFaturacaoMensal meses={mesesFaturacao} periodo={periodoFaturacao} />
       </Card>
 
-      <Card className="mb-4">
-        <h3 className="font-semibold text-gray-900 mb-1">Orçamento pessoal</h3>
-        <p className="text-sm text-brand-muted mb-1">Sobra real este mês</p>
-        <p className="text-2xl font-bold text-gray-900 mb-3">{sobraRealMesAtual.toFixed(2)} €</p>
-        <Link href="/orcamento" className="text-brand-primary font-semibold text-sm">
-          Ver orçamento completo →
-        </Link>
-      </Card>
+      {!carregandoPerfil && perfil?.is_pro && (
+        <Card className="mb-4">
+          <h3 className="font-semibold text-gray-900 mb-1">Orçamento pessoal</h3>
+          <p className="text-sm text-brand-muted mb-1">Sobra real este mês</p>
+          <p className="text-2xl font-bold text-gray-900 mb-3">{sobraRealMesAtual.toFixed(2)} €</p>
+          <Link href="/orcamento" className="text-brand-primary font-semibold text-sm">
+            Ver orçamento completo →
+          </Link>
+        </Card>
+      )}
+
+      {!carregandoPerfil && !perfil?.is_pro && (
+        <Card className="mb-4">
+          <h3 className="font-semibold text-gray-900 mb-1">Orçamento pessoal</h3>
+          <p className="text-sm text-brand-muted mb-3">
+            Vê quanto te sobra mesmo este mês, depois de impostos e despesas pessoais.
+          </p>
+          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver Recibos Claros Pro</Link>
+        </Card>
+      )}
 
       {!carregandoPerfil && perfil?.is_pro && (
         <>
@@ -594,7 +611,7 @@ export default function Painel() {
         <Card className="mb-4">
           <h3 className="font-semibold text-gray-900 mb-1">Funcionalidades Pro</h3>
           <p className="text-sm text-brand-muted mb-3">Desbloqueia &quot;Pôr de lado&quot;, principais clientes e despesas da atividade.</p>
-          <Link href="/perfil" className="text-brand-primary font-semibold text-sm">Ver Recibos Claros Pro</Link>
+          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver Recibos Claros Pro</Link>
         </Card>
       )}
 
@@ -612,18 +629,18 @@ export default function Painel() {
                 <p className="text-sm text-brand-muted mb-4">{contabilista.preco_hora} €/hora</p>
               )}
 
-              {contabilista.cal_link ? (
-                <a
-                  href={contabilista.cal_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium bg-brand-primary text-white hover:opacity-90 transition cursor-pointer no-underline"
-                >
-                  Marcar reunião
-                </a>
-              ) : (
-                <p className="text-xs text-brand-muted">Ainda sem marcações disponíveis.</p>
-              )}
+              {/* A query em carregarContabilistas() já só traz contabilistas com
+                  cal_link definido — não há aqui nenhum caso "sem marcações
+                  disponíveis" a tratar; se não há link, o contabilista nem chega
+                  a aparecer nesta lista. */}
+              <a
+                href={contabilista.cal_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium bg-brand-primary text-white hover:opacity-90 transition cursor-pointer no-underline"
+              >
+                Marcar reunião
+              </a>
             </Card>
           ))}
         </>

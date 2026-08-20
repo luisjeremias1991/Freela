@@ -7,7 +7,10 @@
 // - Outros pedidos GET (JS, CSS, imagens): cache primeiro, com a rede como
 //   reserva — e atualiza sempre a cache com a resposta mais recente.
 
-const NOME_CACHE = 'freela-cache-v2'
+// Versão bumped depois da mudança de cor (brand-navy → brand-primary) — força
+// qualquer browser com um bundle antigo em cache a limpá-lo no próximo load,
+// em vez de continuar a servir classes CSS que já não existem.
+const NOME_CACHE = 'recibos-claros-cache-v3'
 
 self.addEventListener('install', () => {
   self.skipWaiting()

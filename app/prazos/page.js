@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
+import { usePerfil } from '../context/PerfilContext'
 import PageTitle from '../components/ui/PageTitle'
 
 function formatarData(d) {
@@ -19,9 +21,38 @@ function diasQueFaltam(dataStr) {
 }
 
 export default function Prazos() {
+  const { perfil } = usePerfil()
   const [obrigacoes, setObrigacoes] = useState([])
   const [mensagem, setMensagem] = useState('')
   const [carregando, setCarregando] = useState(true)
+
+  // A lista de prazos é sempre grátis — só isto (o envio automático de
+  // lembretes por email) é que é Recibos Claros Pro. Fonte única de verdade:
+  // perfil.is_pro, tal como em todo o resto da app.
+  const [notificacoesAtivas, setNotificacoesAtivas] = useState(false)
+  const [aGuardarNotificacoes, setAGuardarNotificacoes] = useState(false)
+
+  useEffect(() => {
+    setNotificacoesAtivas(!!perfil?.notificacoes_prazos_ativas)
+  }, [perfil])
+
+  async function alternarNotificacoes(ligado) {
+    const anterior = notificacoesAtivas
+    setNotificacoesAtivas(ligado) // otimista — sente-se instantâneo
+    setAGuardarNotificacoes(true)
+
+    const { data: { user } } = await supabase.auth.getUser()
+    const { error } = await supabase
+      .from('perfis')
+      .upsert({ id: user.id, notificacoes_prazos_ativas: ligado }, { onConflict: 'id' })
+
+    setAGuardarNotificacoes(false)
+
+    if (error) {
+      setNotificacoesAtivas(anterior) // reverte se a gravação falhar
+      setMensagem('Erro ao guardar: ' + error.message)
+    }
+  }
 
   async function criarObrigacoesPorDefeito(userId) {
     const hoje = new Date()
@@ -95,6 +126,30 @@ export default function Prazos() {
     <div className="max-w-md mx-auto px-5 py-10">
       <PageTitle>Prazos</PageTitle>
       <p className="text-sm text-brand-muted mb-5">Toca num prazo para o marcares como concluído</p>
+
+      {perfil?.is_pro ? (
+        <div className="flex items-center justify-between gap-3 mb-6 p-4 rounded-lg border border-brand-line">
+          <div>
+            <p className="text-sm font-medium text-gray-900">Notificações automáticas</p>
+            <p className="text-xs text-brand-muted">Recebe um email quando um prazo estiver a chegar.</p>
+          </div>
+          <input
+            type="checkbox"
+            checked={notificacoesAtivas}
+            onChange={(e) => alternarNotificacoes(e.target.checked)}
+            disabled={aGuardarNotificacoes}
+            className="accent-brand-primary w-5 h-5 shrink-0 cursor-pointer"
+            aria-label="Ativar notificações automáticas de prazos"
+          />
+        </div>
+      ) : (
+        <Link
+          href="/perfil#plano"
+          className="block text-center py-2.5 mb-6 rounded-lg border border-brand-line text-brand-muted hover:border-brand-primary hover:text-brand-primary transition no-underline"
+        >
+          🔒 Notificações automáticas (Recibos Claros Pro)
+        </Link>
+      )}
 
       {obrigacoes.length === 0 && <p className="text-sm text-brand-muted">Ainda não tens prazos.</p>}
 

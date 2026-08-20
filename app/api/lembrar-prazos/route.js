@@ -44,12 +44,35 @@ async function processarLembretes(request) {
     const hojeStr = formatarData(hoje)
     const daqui7DiasStr = formatarData(daqui7Dias)
 
+    // Notificações automáticas são Recibos Claros Pro, e dependem também do
+    // toggle em Prazos — perfis.is_pro continua a ser a única fonte de
+    // verdade para "é Pro"; aqui só acrescentamos o segundo requisito
+    // (preferência ligada) por cima, sem duplicar a lógica de is_pro em
+    // lado nenhum.
+    const { data: perfisElegiveis, error: erroPerfis } = await supabaseAdmin
+      .from('perfis')
+      .select('id')
+      .eq('is_pro', true)
+      .eq('notificacoes_prazos_ativas', true)
+
+    if (erroPerfis) {
+      console.error('Erro em lembrar-prazos (a ir buscar perfis elegíveis):', erroPerfis)
+      return NextResponse.json({ error: erroPerfis.message }, { status: 500 })
+    }
+
+    const idsElegiveis = (perfisElegiveis || []).map((p) => p.id)
+
+    if (idsElegiveis.length === 0) {
+      return NextResponse.json({ processadas: 0, resultados: [] })
+    }
+
     const { data: obrigacoes, error: erroObrigacoes } = await supabaseAdmin
       .from('obrigacoes')
       .select('*')
       .eq('done', false)
       .gte('data', hojeStr)
       .lte('data', daqui7DiasStr)
+      .in('user_id', idsElegiveis)
       // Evita duplicados no mesmo dia: só entra quem nunca recebeu lembrete
       // ou recebeu num dia anterior a hoje.
       .or(`lembrete_enviado_em.is.null,lembrete_enviado_em.lt.${hojeStr}`)

@@ -151,6 +151,17 @@ export default function Perfil() {
     carregarPerfil()
   }, [])
 
+  // Links de upsell Pro apontam para /perfil#plano — mas enquanto "carregando"
+  // está true, a página só mostra "A carregar..." e o <h2 id="plano"> nem
+  // existe no DOM ainda, por isso o salto automático do browser para o hash
+  // não tem para onde ir e fica sem efeito nenhum. Assim que os dados chegam
+  // e a secção aparece, fazemos nós o scroll manualmente.
+  useEffect(() => {
+    if (!carregando && window.location.hash === '#plano') {
+      document.getElementById('plano')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [carregando])
+
   async function guardarPerfil() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!nome || !nif) {
@@ -550,7 +561,7 @@ export default function Perfil() {
         {mensagemPasskey && <p className="text-sm text-brand-muted mt-4">{mensagemPasskey}</p>}
       </Card>
 
-      <h2 className="text-lg font-semibold text-gray-900 mb-3">Plano</h2>
+      <h2 id="plano" className="text-lg font-semibold text-gray-900 mb-3 scroll-mt-6">Plano</h2>
       {carregandoPerfil && <p className="text-sm text-brand-muted">A carregar plano...</p>}
 
       {!carregandoPerfil && !perfil?.is_pro && (
