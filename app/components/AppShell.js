@@ -126,7 +126,7 @@ export default function AppShell({ children }) {
     >
       <button
         onClick={sair}
-        className="fixed top-4 right-4 z-100 rounded-lg border border-brand-navy px-3.5 py-2 text-sm font-medium text-brand-navy bg-white hover:bg-brand-navy-tint transition cursor-pointer"
+        className="fixed top-4 right-4 z-100 rounded-lg border border-brand-primary px-3.5 py-2 text-sm font-medium text-brand-primary bg-white hover:bg-brand-navy-tint transition cursor-pointer"
       >
         Sair
       </button>

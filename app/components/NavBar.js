@@ -23,7 +23,7 @@ export default function NavBar() {
             key={item.href}
             href={item.href}
             className={`flex-1 flex flex-col items-center justify-center gap-1 py-4 min-h-12 text-[13px] no-underline transition ${
-              ativo ? 'text-brand-navy font-semibold' : 'text-brand-muted'
+              ativo ? 'text-brand-primary font-semibold' : 'text-brand-muted'
             }`}
           >
             <span aria-hidden="true" className="text-base">{item.icone}</span>

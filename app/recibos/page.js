@@ -208,7 +208,7 @@ export default function Recibos() {
     <div className="max-w-md mx-auto px-5 py-10">
       <PageTitle>Recibos</PageTitle>
 
-      <Card ref={formularioRef} className={`mb-6 flex flex-col gap-4 ${editandoId ? 'ring-2 ring-brand-navy' : ''}`}>
+      <Card ref={formularioRef} className={`mb-6 flex flex-col gap-4 ${editandoId ? 'ring-2 ring-brand-primary' : ''}`}>
         <h3 className="font-semibold text-gray-900 -mb-1">
           {editandoId ? 'Editar recibo' : 'Adicionar recibo'}
         </h3>
@@ -240,7 +240,7 @@ export default function Recibos() {
             type="checkbox"
             checked={retencao}
             onChange={(e) => setRetencao(e.target.checked)}
-            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
+            className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="retencao-recibo" className="cursor-pointer">
             Retenção na fonte
@@ -288,9 +288,9 @@ export default function Recibos() {
       ) : (
         <Link
           href="/perfil"
-          className="block text-center py-2.5 mb-5 rounded-lg border border-brand-line text-brand-muted hover:border-brand-navy hover:text-brand-navy transition no-underline"
+          className="block text-center py-2.5 mb-5 rounded-lg border border-brand-line text-brand-muted hover:border-brand-primary hover:text-brand-primary transition no-underline"
         >
-          🔒 Filtros de pesquisa (Freela Pro)
+          🔒 Filtros de pesquisa (Recibos Claros Pro)
         </Link>
       )}
 
@@ -299,9 +299,9 @@ export default function Recibos() {
       ) : (
         <Link
           href="/perfil"
-          className="block text-center py-2.5 mb-5 rounded-lg border border-brand-line text-brand-muted hover:border-brand-navy hover:text-brand-navy transition no-underline"
+          className="block text-center py-2.5 mb-5 rounded-lg border border-brand-line text-brand-muted hover:border-brand-primary hover:text-brand-primary transition no-underline"
         >
-          🔒 Exportar CSV (Freela Pro)
+          🔒 Exportar CSV (Recibos Claros Pro)
         </Link>
       )}
 
@@ -332,7 +332,7 @@ export default function Recibos() {
                   e.stopPropagation()
                   marcarComoPago(r)
                 }}
-                className="text-xs px-2 py-1 rounded-md border border-brand-line text-brand-muted hover:border-brand-navy hover:text-brand-navy transition cursor-pointer"
+                className="text-xs px-2 py-1 rounded-md border border-brand-line text-brand-muted hover:border-brand-primary hover:text-brand-primary transition cursor-pointer"
               >
                 Marcar como pago
               </button>

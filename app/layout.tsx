@@ -4,13 +4,13 @@ import ServiceWorkerRegistrar from "./components/ServiceWorkerRegistrar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Free Freela",
+  title: "Recibos Claros",
   description: "Gestão de recibos, prazos e obrigações fiscais para freelancers.",
   icons: {
     apple: "/icons/icon-192.png",
   },
   appleWebApp: {
-    title: "Freela",
+    title: "Recibos Claros",
     statusBarStyle: "default",
   },
 };

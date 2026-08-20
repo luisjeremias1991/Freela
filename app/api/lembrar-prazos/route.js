@@ -85,7 +85,7 @@ async function processarLembretes(request) {
             <p>Olá,</p>
             <p>A obrigação <strong>${obrigacao.nome}</strong> tem data marcada para <strong>${dataFormatada}</strong> — ${textoDiasQueFaltam(dias)}.</p>
             <p>Não te esqueças de a tratar a tempo.</p>
-            <p>— Freela</p>
+            <p>— Recibos Claros</p>
           `
         })
 

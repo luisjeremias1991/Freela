@@ -86,7 +86,7 @@ export default function RedefinirPassword() {
         <Card>
           <p className="text-sm text-gray-900">
             Este link de recuperação é inválido ou já expirou. Pede um novo em{' '}
-            <a href="/login" className="text-brand-navy font-semibold">/login</a>.
+            <a href="/login" className="text-brand-primary font-semibold">/login</a>.
           </p>
         </Card>
       ) : (

@@ -66,7 +66,7 @@ export async function POST(request) {
         }, { onConflict: 'id' })
 
       if (error) {
-        console.error('Erro ao ativar Freela Pro após checkout:', error.message)
+        console.error('Erro ao ativar Recibos Claros Pro após checkout:', error.message)
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
     }

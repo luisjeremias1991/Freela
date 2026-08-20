@@ -3,7 +3,7 @@ import Card from '../components/ui/Card'
 import PageTitle from '../components/ui/PageTitle'
 
 export const metadata = {
-  title: 'Política de Privacidade — Freela'
+  title: 'Política de Privacidade — Recibos Claros'
 }
 
 export default function Privacidade() {
@@ -18,15 +18,9 @@ export default function Privacidade() {
         <section>
           <h2 className="font-bold text-base text-gray-900 mb-2">1. Quem trata os teus dados</h2>
           <p className="mb-3">
-            A Free Freela é responsável pelo tratamento dos dados pessoais recolhidos através desta aplicação.
+            A Recibos Claros é responsável pelo tratamento dos dados pessoais recolhidos através desta aplicação.
           </p>
-          <p>
-            Contacto: luis.a.jeremias@gmail.com{' '}
-            <span className="text-brand-muted italic">
-              (temporário — trocar por um email profissional, ex. suporte@freefreela.pt, assim que o domínio
-              estiver ativo)
-            </span>
-          </p>
+          <p>Contacto: suporte@recibosclaros.pt</p>
         </section>
 
         <section>
@@ -42,7 +36,7 @@ export default function Privacidade() {
               estado de pagamento), despesas
             </li>
             <li>
-              <strong>Dados de pagamento</strong>: geridos diretamente pela Stripe — a Free Freela nunca vê nem
+              <strong>Dados de pagamento</strong>: geridos diretamente pela Stripe — a Recibos Claros nunca vê nem
               guarda o número do teu cartão
             </li>
             <li>
@@ -56,7 +50,7 @@ export default function Privacidade() {
           <h2 className="font-bold text-base text-gray-900 mb-2">3. Para que usamos estes dados</h2>
           <ul className="list-disc pl-5 space-y-1.5">
             <li>Fazer funcionar a aplicação (mostrar os teus recibos, calcular estimativas fiscais)</li>
-            <li>Processar a tua subscrição Free Freela Pro, através da Stripe</li>
+            <li>Processar a tua subscrição Recibos Claros Pro, através da Stripe</li>
             <li>Enviar-te lembretes de prazos fiscais, se tiveres essa funcionalidade ativa</li>
             <li>Melhorar o produto (de forma agregada, não individual)</li>
           </ul>
@@ -95,10 +89,7 @@ export default function Privacidade() {
             <li>Exportar os teus dados (ex. via a funcionalidade de exportação CSV)</li>
             <li>Retirar consentimento a qualquer momento</li>
           </ul>
-          <p>
-            Para exerceres qualquer um destes direitos, contacta-nos em luis.a.jeremias@gmail.com{' '}
-            <span className="text-brand-muted italic">(temporário)</span>.
-          </p>
+          <p>Para exerceres qualquer um destes direitos, contacta-nos em suporte@recibosclaros.pt.</p>
         </section>
 
         <section>
@@ -119,7 +110,7 @@ export default function Privacidade() {
       </Card>
 
       <p className="text-sm text-brand-muted mt-6 text-center">
-        <Link href="/login" className="text-brand-navy font-semibold">Voltar</Link>
+        <Link href="/login" className="text-brand-primary font-semibold">Voltar</Link>
       </p>
     </div>
   )

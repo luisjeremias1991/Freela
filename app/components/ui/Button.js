@@ -1,6 +1,6 @@
 const VARIANTES = {
-  primary: "bg-brand-navy text-white hover:opacity-90",
-  secondary: "bg-transparent border border-brand-navy text-brand-navy hover:bg-brand-navy-tint",
+  primary: "bg-brand-primary text-white hover:opacity-90",
+  secondary: "bg-transparent border border-brand-primary text-brand-primary hover:bg-brand-navy-tint",
 };
 
 export default function Button({ variant = "primary", className = "", ...props }) {

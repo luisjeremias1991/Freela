@@ -1,4 +1,4 @@
-// Service worker básico do Free Freela — sem dependências externas.
+// Service worker básico da Recibos Claros — sem dependências externas.
 //
 // Estratégia:
 // - Pedidos de navegação (páginas HTML): tenta a rede primeiro; se falhar

@@ -80,7 +80,7 @@ async function processarLembretes(request) {
             <p>Olá,</p>
             <p>A fatura de <strong>${recibo.cliente}</strong>, no valor de <strong>${recibo.valor}€</strong>, emitida em <strong>${dataEmissaoFormatada}</strong>, continua sem pagamento registado — já passaram <strong>${dias} dias</strong>.</p>
             <p>Pode valer a pena entrares em contacto com o cliente para agilizar o pagamento.</p>
-            <p>— Freela</p>
+            <p>— Recibos Claros</p>
           `
         })
 

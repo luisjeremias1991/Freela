@@ -116,7 +116,7 @@ export default function CriarConta() {
             type="checkbox"
             checked={termosAceites}
             onChange={(e) => setTermosAceites(e.target.checked)}
-            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
+            className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="termos" className="cursor-pointer">
             Li e aceito os{' '}
@@ -128,7 +128,7 @@ export default function CriarConta() {
               // clique no <label> (o que alternaria a checkbox sem a pessoa
               // querer) — mesmo cuidado já aplicado ao InfoIcon dentro de labels.
               onClick={(e) => e.stopPropagation()}
-              className="text-brand-navy font-semibold"
+              className="text-brand-primary font-semibold"
             >
               Termos de Uso
             </Link>{' '}
@@ -138,7 +138,7 @@ export default function CriarConta() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="text-brand-navy font-semibold"
+              className="text-brand-primary font-semibold"
             >
               Política de Privacidade
             </Link>
@@ -152,7 +152,7 @@ export default function CriarConta() {
 
       <p className="text-sm text-brand-muted mt-6 text-center">
         Já tens conta?{' '}
-        <Link href="/login" className="text-brand-navy font-semibold">Entrar</Link>
+        <Link href="/login" className="text-brand-primary font-semibold">Entrar</Link>
       </p>
     </div>
   )

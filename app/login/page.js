@@ -179,7 +179,7 @@ export default function Login() {
         <button
           type="button"
           onClick={abrirRecuperacao}
-          className="text-sm text-brand-navy text-left cursor-pointer"
+          className="text-sm text-brand-primary text-left cursor-pointer"
         >
           Esqueci-me da palavra-passe
         </button>
@@ -189,7 +189,7 @@ export default function Login() {
 
       <p className="text-sm text-brand-muted mt-6 text-center">
         Ainda não tens conta?{' '}
-        <Link href="/criar-conta" className="text-brand-navy font-semibold">Criar conta</Link>
+        <Link href="/criar-conta" className="text-brand-primary font-semibold">Criar conta</Link>
       </p>
     </div>
   )

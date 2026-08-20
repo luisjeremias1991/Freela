@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Free Freela",
-    short_name: "Freela",
+    name: "Recibos Claros",
+    short_name: "R. Claros",
     description: "Gestão de recibos, prazos e obrigações fiscais para freelancers.",
     start_url: "/",
     display: "standalone",

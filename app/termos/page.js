@@ -4,7 +4,7 @@ import PageTitle from '../components/ui/PageTitle'
 import { VERSAO_TERMOS_LABEL } from '../../lib/termos'
 
 export const metadata = {
-  title: 'Termos de Uso — Freela'
+  title: 'Termos de Uso — Recibos Claros'
 }
 
 export default function Termos() {
@@ -17,9 +17,9 @@ export default function Termos() {
 
       <Card className="flex flex-col gap-6 text-sm text-gray-900 leading-relaxed">
         <section>
-          <h2 className="font-bold text-base text-gray-900 mb-2">1. O que é a Free Freela</h2>
+          <h2 className="font-bold text-base text-gray-900 mb-2">1. O que é a Recibos Claros</h2>
           <p>
-            A Free Freela é uma ferramenta de apoio à gestão de recibos verdes e obrigações fiscais para
+            A Recibos Claros é uma ferramenta de apoio à gestão de recibos verdes e obrigações fiscais para
             trabalhadores independentes em Portugal. <strong>Não é um serviço de contabilidade, não emite
             documentos fiscais oficiais, e não substitui aconselhamento profissional.</strong>
           </p>
@@ -30,14 +30,14 @@ export default function Termos() {
           <p className="mb-3">Este é o ponto mais importante destes termos, por isso destacamos:</p>
           <p className="mb-3">
             <strong>
-              Todos os valores apresentados pela Free Freela — estimativas de IRS, Segurança Social, IVA,
+              Todos os valores apresentados pela Recibos Claros — estimativas de IRS, Segurança Social, IVA,
               valores líquidos, &quot;pôr de lado&quot;, ou qualquer outro cálculo — são gerados exclusivamente
               com base na informação que tu próprio inseres na aplicação
             </strong>{' '}
             (recibos, datas, retenções, regime fiscal, categoria de atividade, e demais dados do Perfil).
           </p>
           <p className="mb-3">
-            A Free Freela não verifica, não confirma e não tem forma de saber se os dados inseridos estão
+            A Recibos Claros não verifica, não confirma e não tem forma de saber se os dados inseridos estão
             corretos, completos ou atualizados. Se inserires um valor errado, esquecer um recibo, ou preencheres
             mal o teu regime fiscal, os cálculos resultantes vão refletir esse erro — não é possível à aplicação
             detetar isso.
@@ -75,7 +75,7 @@ export default function Termos() {
         <section>
           <h2 className="font-bold text-base text-gray-900 mb-2">5. Plano Pro e pagamentos</h2>
           <p>
-            A subscrição Free Freela Pro é processada através da Stripe. Podes cancelar a qualquer momento — o
+            A subscrição Recibos Claros Pro é processada através da Stripe. Podes cancelar a qualquer momento — o
             acesso Pro mantém-se ativo até ao fim do período já pago.
           </p>
         </section>
@@ -83,8 +83,8 @@ export default function Termos() {
         <section>
           <h2 className="font-bold text-base text-gray-900 mb-2">6. Marketplace de contabilistas</h2>
           <p>
-            A Free Freela pode apresentar contabilistas parceiros disponíveis para consulta, com marcação
-            através de plataformas externas (ex. Cal.com). A Free Freela não é parte no serviço prestado entre o
+            A Recibos Claros pode apresentar contabilistas parceiros disponíveis para consulta, com marcação
+            através de plataformas externas (ex. Cal.com). A Recibos Claros não é parte no serviço prestado entre o
             contabilista e o cliente, e não se responsabiliza pela qualidade, exatidão ou resultado desse
             aconselhamento — a relação profissional estabelece-se diretamente entre as duas partes.
           </p>
@@ -100,17 +100,12 @@ export default function Termos() {
 
         <section>
           <h2 className="font-bold text-base text-gray-900 mb-2">8. Contacto</h2>
-          <p>
-            luis.a.jeremias@gmail.com{' '}
-            <span className="text-brand-muted italic">
-              (temporário — trocar por email de suporte profissional assim que o domínio estiver ativo)
-            </span>
-          </p>
+          <p>suporte@recibosclaros.pt</p>
         </section>
       </Card>
 
       <p className="text-sm text-brand-muted mt-6 text-center">
-        <Link href="/login" className="text-brand-navy font-semibold">Voltar</Link>
+        <Link href="/login" className="text-brand-primary font-semibold">Voltar</Link>
       </p>
     </div>
   )

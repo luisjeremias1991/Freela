@@ -4,7 +4,7 @@ import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { resend } from '../../../lib/resend'
 
 const COMISSAO_APP = 0.30
-const EMAIL_SUPORTE = process.env.EMAIL_SUPORTE || 'luis.a.jeremias@gmail.com'
+const EMAIL_SUPORTE = process.env.EMAIL_SUPORTE || 'suporte@recibosclaros.pt'
 
 function formatarDataHoraPT(iso) {
   if (!iso) return 'data desconhecida'

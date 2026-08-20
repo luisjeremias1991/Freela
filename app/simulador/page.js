@@ -89,7 +89,7 @@ export default function Simulador() {
           onClick={() => selecionarModo('brutoLiquido')}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
             modo === 'brutoLiquido'
-              ? 'bg-brand-navy text-white border-2 border-brand-navy'
+              ? 'bg-brand-primary text-white border-2 border-brand-primary'
               : 'bg-white text-gray-900 border border-brand-line'
           }`}
         >
@@ -99,7 +99,7 @@ export default function Simulador() {
           onClick={() => selecionarModo('liquidoBruto')}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
             modo === 'liquidoBruto'
-              ? 'bg-brand-navy text-white border-2 border-brand-navy'
+              ? 'bg-brand-primary text-white border-2 border-brand-primary'
               : 'bg-white text-gray-900 border border-brand-line'
           }`}
         >
@@ -110,8 +110,8 @@ export default function Simulador() {
       {mostrarUpsell && (
         <Card className="mb-5">
           <p className="text-sm text-gray-900">
-            O simulador inverso (líquido → bruto) é uma funcionalidade Freela Pro.{' '}
-            <Link href="/perfil" className="text-brand-navy font-semibold">Subscreve aqui</Link> para o desbloqueares.
+            O simulador inverso (líquido → bruto) é uma funcionalidade Recibos Claros Pro.{' '}
+            <Link href="/perfil" className="text-brand-primary font-semibold">Subscreve aqui</Link> para o desbloqueares.
           </p>
         </Card>
       )}
@@ -137,7 +137,7 @@ export default function Simulador() {
               type="checkbox"
               checked={incluiIva}
               onChange={(e) => setIncluiIva(e.target.checked)}
-              className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
+              className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
             />
             <label htmlFor="inclui-iva" className="cursor-pointer">
               Este valor já inclui IVA?
@@ -151,7 +151,7 @@ export default function Simulador() {
             type="checkbox"
             checked={primeiroAno}
             onChange={(e) => setPrimeiroAno(e.target.checked)}
-            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
+            className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="primeiro-ano" className="cursor-pointer">
             1º ano de atividade
@@ -168,7 +168,7 @@ export default function Simulador() {
             type="checkbox"
             checked={retencaoFonte}
             onChange={(e) => setRetencaoFonte(e.target.checked)}
-            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
+            className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="retencao-fonte-simulador" className="cursor-pointer">
             Cliente retém na fonte
@@ -240,9 +240,9 @@ export default function Simulador() {
               </Card>
             </div>
 
-            <Card className="border-2 border-brand-navy">
+            <Card className="border-2 border-brand-primary">
               <p className="text-sm text-brand-muted mb-1">Valor líquido</p>
-              <p className="text-5xl font-bold text-brand-navy">{liquido.toFixed(2)} €</p>
+              <p className="text-5xl font-bold text-brand-primary">{liquido.toFixed(2)} €</p>
               <p className="text-xs text-brand-muted mt-3">{formulaLiquido}</p>
 
               <p className="text-xs text-brand-muted mt-4 pt-3 border-t border-brand-line">

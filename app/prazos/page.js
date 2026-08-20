@@ -108,8 +108,8 @@ export default function Prazos() {
           >
             <span
               aria-hidden="true"
-              className={`w-[26px] h-[26px] rounded-full border-2 border-brand-navy shrink-0 ${
-                o.done ? 'bg-brand-navy' : 'bg-white'
+              className={`w-[26px] h-[26px] rounded-full border-2 border-brand-primary shrink-0 ${
+                o.done ? 'bg-brand-primary' : 'bg-white'
               }`}
             />
             <div className="flex-1">

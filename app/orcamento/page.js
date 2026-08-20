@@ -120,7 +120,7 @@ export default function Orcamento() {
 
   return (
     <div className="max-w-md mx-auto px-5 py-10">
-      <Link href="/painel" className="inline-block text-sm text-brand-navy font-semibold mb-5">
+      <Link href="/painel" className="inline-block text-sm text-brand-primary font-semibold mb-5">
         ← Voltar ao Painel
       </Link>
 
@@ -154,7 +154,7 @@ export default function Orcamento() {
                 </div>
                 <div className="h-2 rounded-full bg-brand-navy-tint overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-brand-navy"
+                    className="h-full rounded-full bg-brand-primary"
                     style={{ width: `${percentagem}%` }}
                   />
                 </div>

@@ -432,7 +432,7 @@ export default function Perfil() {
             type="checkbox"
             checked={acumulaOutroTrabalho}
             onChange={(e) => setAcumulaOutroTrabalho(e.target.checked)}
-            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
+            className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="acumula-outro-trabalho" className="cursor-pointer">
             Acumula com trabalho por conta de outrem
@@ -449,7 +449,7 @@ export default function Perfil() {
             type="checkbox"
             checked={pensionista}
             onChange={(e) => setPensionista(e.target.checked)}
-            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
+            className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="pensionista" className="cursor-pointer">
             É pensionista
@@ -478,7 +478,7 @@ export default function Perfil() {
             type="checkbox"
             checked={ppcIsento}
             onChange={(e) => setPpcIsento(e.target.checked)}
-            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
+            className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="ppc-isento" className="cursor-pointer">
             Não sou obrigado a pagamentos por conta este ano
@@ -556,22 +556,22 @@ export default function Perfil() {
       {!carregandoPerfil && !perfil?.is_pro && (
         <Card className="mb-4">
           <h3 className="font-semibold text-gray-900 mb-1">Plano Grátis</h3>
-          <p className="text-sm text-brand-muted mb-4">Estás a usar a versão gratuita do Freela.</p>
-          <Button onClick={() => setModalProAberto(true)}>Ver Freela Pro</Button>
+          <p className="text-sm text-brand-muted mb-4">Estás a usar a versão gratuita da Recibos Claros.</p>
+          <Button onClick={() => setModalProAberto(true)}>Ver Recibos Claros Pro</Button>
         </Card>
       )}
 
       {!carregandoPerfil && perfil?.is_pro && !perfil?.pro_cancelled && (
-        <Card className="mb-4 border-brand-navy">
-          <h3 className="font-semibold text-gray-900 mb-1">Freela Pro ativo</h3>
+        <Card className="mb-4 border-brand-primary">
+          <h3 className="font-semibold text-gray-900 mb-1">Recibos Claros Pro ativo</h3>
           <p className="text-sm text-brand-muted mb-4">Já tens acesso a todas as funcionalidades Pro.</p>
           <Button variant="secondary" onClick={cancelarSubscricao}>Cancelar subscrição</Button>
         </Card>
       )}
 
       {!carregandoPerfil && perfil?.is_pro && perfil?.pro_cancelled && (
-        <Card className="mb-4 border-brand-navy">
-          <h3 className="font-semibold text-gray-900 mb-1">Freela Pro ativo</h3>
+        <Card className="mb-4 border-brand-primary">
+          <h3 className="font-semibold text-gray-900 mb-1">Recibos Claros Pro ativo</h3>
           <p className="text-sm text-brand-muted mb-4">
             Cancelamento agendado para {formatarDataPT(perfil.pro_ends_at)}. Continuas com acesso Pro até lá.
           </p>
@@ -582,14 +582,14 @@ export default function Perfil() {
       {mensagemPlano && <p className="text-sm text-brand-muted">{mensagemPlano}</p>}
 
       <Modal open={modalProAberto} onClose={() => setModalProAberto(false)}>
-        <h2 className="text-xl font-bold text-gray-900 mb-5">Freela Pro</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-5">Recibos Claros Pro</h2>
 
         <div className="flex gap-2.5 mb-5">
           <button
             onClick={() => setCicloEscolhido('mensal')}
             className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
               cicloEscolhido === 'mensal'
-                ? 'bg-brand-navy text-white border-2 border-brand-navy'
+                ? 'bg-brand-primary text-white border-2 border-brand-primary'
                 : 'bg-white text-gray-900 border border-brand-line'
             }`}
           >
@@ -599,7 +599,7 @@ export default function Perfil() {
             onClick={() => setCicloEscolhido('anual')}
             className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
               cicloEscolhido === 'anual'
-                ? 'bg-brand-navy text-white border-2 border-brand-navy'
+                ? 'bg-brand-primary text-white border-2 border-brand-primary'
                 : 'bg-white text-gray-900 border border-brand-line'
             }`}
           >
@@ -616,7 +616,7 @@ export default function Perfil() {
         {mensagemPlano && <p className="text-sm text-brand-muted mb-4">{mensagemPlano}</p>}
 
         <div className="flex gap-2.5">
-          <Button className="flex-1" onClick={subscreverPro}>Subscrever Freela Pro</Button>
+          <Button className="flex-1" onClick={subscreverPro}>Subscrever Recibos Claros Pro</Button>
           <Button variant="secondary" onClick={() => setModalProAberto(false)}>Fechar</Button>
         </div>
       </Modal>

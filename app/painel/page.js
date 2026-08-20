@@ -171,7 +171,7 @@ function GraficoFaturacaoMensal({ meses, periodo }) {
                       width={larguraBarra}
                       height={Math.max(alturaBarra, 1)}
                       rx={4}
-                      fill={m.ehAtual ? 'var(--color-brand-navy)' : 'var(--color-brand-line)'}
+                      fill={m.ehAtual ? 'var(--color-brand-primary)' : 'var(--color-brand-line)'}
                       tabIndex={0}
                       onMouseEnter={() => setMesEmFoco(i)}
                       onMouseLeave={() => setMesEmFoco(null)}
@@ -213,7 +213,7 @@ function GraficoFaturacaoMensal({ meses, periodo }) {
       <button
         type="button"
         onClick={() => setVerTabela((v) => !v)}
-        className="text-xs text-brand-navy font-medium cursor-pointer"
+        className="text-xs text-brand-primary font-medium cursor-pointer"
       >
         {verTabela ? 'Ver gráfico' : 'Ver como tabela'}
       </button>
@@ -410,7 +410,7 @@ export default function Painel() {
     <div className="max-w-md mx-auto px-5 py-10">
       <PageTitle>Painel</PageTitle>
 
-      <Card className="mb-4 border-2 border-brand-navy">
+      <Card className="mb-4 border-2 border-brand-primary">
         <p className="text-sm text-brand-muted mb-1">Lucro líquido real</p>
         <p className="text-3xl font-bold text-gray-900">{lucroLiquidoReal.toFixed(2)} €</p>
         <p className="text-xs text-brand-muted mt-2">{textoSubtracaoLucro}</p>
@@ -448,7 +448,7 @@ export default function Painel() {
               onClick={() => setPeriodoFaturacao(opcao.valor)}
               className={`rounded-full px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
                 periodoFaturacao === opcao.valor
-                  ? 'bg-brand-navy text-white'
+                  ? 'bg-brand-primary text-white'
                   : 'bg-white text-gray-900 border border-brand-line'
               }`}
             >
@@ -464,7 +464,7 @@ export default function Painel() {
         <h3 className="font-semibold text-gray-900 mb-1">Orçamento pessoal</h3>
         <p className="text-sm text-brand-muted mb-1">Sobra real este mês</p>
         <p className="text-2xl font-bold text-gray-900 mb-3">{sobraRealMesAtual.toFixed(2)} €</p>
-        <Link href="/orcamento" className="text-brand-navy font-semibold text-sm">
+        <Link href="/orcamento" className="text-brand-primary font-semibold text-sm">
           Ver orçamento completo →
         </Link>
       </Card>
@@ -514,7 +514,7 @@ export default function Painel() {
               ) : (
                 <span className="text-right">
                   <strong className="text-brand-muted font-normal block">Ainda não disponível</strong>
-                  <Link href="/perfil" className="text-xs text-brand-navy font-semibold">
+                  <Link href="/perfil" className="text-xs text-brand-primary font-semibold">
                     Já sabes o valor? Define aqui →
                   </Link>
                 </span>
@@ -594,7 +594,7 @@ export default function Painel() {
         <Card className="mb-4">
           <h3 className="font-semibold text-gray-900 mb-1">Funcionalidades Pro</h3>
           <p className="text-sm text-brand-muted mb-3">Desbloqueia &quot;Pôr de lado&quot;, principais clientes e despesas da atividade.</p>
-          <Link href="/perfil" className="text-brand-navy font-semibold text-sm">Ver Freela Pro</Link>
+          <Link href="/perfil" className="text-brand-primary font-semibold text-sm">Ver Recibos Claros Pro</Link>
         </Card>
       )}
 
@@ -617,7 +617,7 @@ export default function Painel() {
                   href={contabilista.cal_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium bg-brand-navy text-white hover:opacity-90 transition cursor-pointer no-underline"
+                  className="inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium bg-brand-primary text-white hover:opacity-90 transition cursor-pointer no-underline"
                 >
                   Marcar reunião
                 </a>

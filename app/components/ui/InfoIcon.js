@@ -20,9 +20,9 @@ export default function InfoIcon({ titulo, texto }) {
         type="button"
         onClick={abrir}
         aria-label={`Mais informação: ${titulo}`}
-        className="inline-flex items-center justify-center w-8 h-8 -my-1.5 ml-1 rounded-full text-brand-navy cursor-pointer align-middle shrink-0"
+        className="inline-flex items-center justify-center w-8 h-8 -my-1.5 ml-1 rounded-full text-brand-primary cursor-pointer align-middle shrink-0"
       >
-        <span className="w-5 h-5 rounded-full border border-brand-navy text-[11px] leading-none font-bold flex items-center justify-center">
+        <span className="w-5 h-5 rounded-full border border-brand-primary text-[11px] leading-none font-bold flex items-center justify-center">
           i
         </span>
       </button>
@@ -32,7 +32,7 @@ export default function InfoIcon({ titulo, texto }) {
         <p className="text-sm text-gray-900 leading-relaxed mb-5">{texto}</p>
         <button
           onClick={() => setAberto(false)}
-          className="w-full rounded-lg px-5 py-2.5 font-medium bg-brand-navy text-white hover:opacity-90 transition cursor-pointer"
+          className="w-full rounded-lg px-5 py-2.5 font-medium bg-brand-primary text-white hover:opacity-90 transition cursor-pointer"
         >
           Entendi
         </button>
