@@ -63,6 +63,16 @@ export default function Simulador() {
   const ss = primeiroAno ? 0 : valorBase * 0.70 * 0.214
   const liquido = valorBase - irs - ss
 
+  // Fórmula de apoio mostrada por baixo do "Valor líquido" — começa sempre no
+  // valor tal como foi escrito (valorNum), nunca já no valor sem IVA. Só
+  // entra o passo "(IVA)" quando incluiIva está marcado: se não estiver,
+  // valorNum já É o valor sem IVA (valorBase === valorNum), por isso não há
+  // nada a descontar nesse passo — o IVA nesse caso é acrescentado à parte na
+  // fatura, não retirado daqui.
+  const formulaLiquido = incluiIva
+    ? `${valorNum.toFixed(2)} € − ${ivaAEntregar.toFixed(2)} € (IVA) − ${irs.toFixed(2)} € (IRS) − ${ss.toFixed(2)} € (SS)`
+    : `${valorNum.toFixed(2)} € − ${irs.toFixed(2)} € (IRS) − ${ss.toFixed(2)} € (SS)`
+
   // Modo Líquido → Bruto: bruto = liquido / (1 - taxaRetencao - taxaSS)
   const divisor = 1 - taxaRetencao - taxaSS
   const brutoNecessario = divisor > 0 ? valorNum / divisor : 0
@@ -233,9 +243,7 @@ export default function Simulador() {
             <Card className="border-2 border-brand-navy">
               <p className="text-sm text-brand-muted mb-1">Valor líquido</p>
               <p className="text-5xl font-bold text-brand-navy">{liquido.toFixed(2)} €</p>
-              <p className="text-xs text-brand-muted mt-3">
-                {valorBase.toFixed(2)} € − {irs.toFixed(2)} € − {ss.toFixed(2)} €
-              </p>
+              <p className="text-xs text-brand-muted mt-3">{formulaLiquido}</p>
 
               <p className="text-xs text-brand-muted mt-4 pt-3 border-t border-brand-line">
                 O líquido não muda consoante a retenção — muda é quem entrega o IRS ao Estado e quando: se o
