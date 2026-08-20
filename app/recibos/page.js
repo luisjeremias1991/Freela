@@ -10,7 +10,7 @@ import PageTitle from '../components/ui/PageTitle'
 import Label from '../components/ui/Label'
 import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
-import InfoIcon from '../components/ui/InfoIcon'
+import RotuloInfo from '../components/ui/RotuloInfo'
 
 function estaNoPeriodo(dataStr, periodo) {
   if (periodo === 'todos') return true
@@ -224,11 +224,12 @@ export default function Recibos() {
 
         <div>
           <Label htmlFor="data-pagamento">
-            Data de pagamento
-            <InfoIcon
+            <RotuloInfo
               titulo="Data de pagamento"
               texto="Deixa este campo vazio se ainda não recebeste. Assim que o cliente pagar, volta aqui e preenche a data — isso atualiza automaticamente o estado do recibo para &quot;Pago&quot; e ajusta os cálculos do Painel."
-            />
+            >
+              Data de pagamento
+            </RotuloInfo>
           </Label>
           <Input id="data-pagamento" type="date" value={dataPagamento} onChange={(e) => setDataPagamento(e.target.value)} />
           {!dataPagamento && <p className="text-xs text-brand-muted mt-1">Ainda não foi pago</p>}
@@ -243,11 +244,12 @@ export default function Recibos() {
             className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="retencao-recibo" className="cursor-pointer">
-            Retenção na fonte
-            <InfoIcon
+            <RotuloInfo
               titulo="Retenção na fonte"
               texto="Normalmente aplica-se quando o cliente é uma empresa — é ela que desconta o IRS antes de te pagar e entrega-o ao Estado. Se o cliente for um particular, muitas vezes não há retenção, e recebes o valor todo."
-            />
+            >
+              Retenção na fonte
+            </RotuloInfo>
           </label>
         </div>
 

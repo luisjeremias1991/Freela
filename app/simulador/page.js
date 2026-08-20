@@ -7,7 +7,7 @@ import Card from '../components/ui/Card'
 import PageTitle from '../components/ui/PageTitle'
 import Label from '../components/ui/Label'
 import Input from '../components/ui/Input'
-import InfoIcon from '../components/ui/InfoIcon'
+import RotuloInfo from '../components/ui/RotuloInfo'
 
 export default function Simulador() {
   const { perfil, carregandoPerfil } = usePerfil()
@@ -168,11 +168,12 @@ export default function Simulador() {
             className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="primeiro-ano" className="cursor-pointer">
-            1º ano de atividade
-            <InfoIcon
+            <RotuloInfo
               titulo="1º ano de atividade"
               texto="No primeiro ano como trabalhador independente estás isento de pagar Segurança Social. Essa isenção acaba automaticamente a partir do 12º mês de atividade."
-            />
+            >
+              1º ano de atividade
+            </RotuloInfo>
           </label>
         </div>
 
@@ -185,11 +186,12 @@ export default function Simulador() {
             className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="retencao-fonte-simulador" className="cursor-pointer">
-            Cliente retém na fonte
-            <InfoIcon
+            <RotuloInfo
               titulo="Retenção na fonte"
               texto="Normalmente aplica-se quando o cliente é uma empresa — é ela que desconta o IRS antes de te pagar e entrega-o ao Estado. Se o cliente for um particular, muitas vezes não há retenção, e recebes o valor todo."
-            />
+            >
+              Cliente retém na fonte
+            </RotuloInfo>
           </label>
         </div>
       </Card>
@@ -229,26 +231,28 @@ export default function Simulador() {
             <div className="flex gap-2.5 mb-4">
               <Card className="flex-1">
                 <p className="text-xs text-brand-muted mb-1">
-                  {retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
-                  <InfoIcon
+                  <RotuloInfo
                     titulo={retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
                     texto={
                       retencaoFonte
                         ? 'Já entregue pelo cliente ao Estado — não chega a ser depositado na tua conta.'
                         : 'Este valor chega à tua conta agora, mas continua a ser devido — vais ter de o pagar depois (na declaração de IRS ou em pagamentos por conta).'
                     }
-                  />
+                  >
+                    {retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
+                  </RotuloInfo>
                 </p>
                 <p className="text-lg font-semibold text-gray-900">{irs.toFixed(2)} €</p>
               </Card>
 
               <Card className="flex-1">
                 <p className="text-xs text-brand-muted mb-1">
-                  Segurança Social
-                  <InfoIcon
+                  <RotuloInfo
                     titulo="Segurança Social"
                     texto="É a tua contribuição mensal que te dá direito a subsídios e à reforma no futuro. Calcula-se sobre 70% da tua faturação, não sobre o valor todo."
-                  />
+                  >
+                    Segurança Social
+                  </RotuloInfo>
                 </p>
                 <p className="text-lg font-semibold text-gray-900">{ss.toFixed(2)} €</p>
               </Card>
@@ -294,26 +298,28 @@ export default function Simulador() {
           <div className="flex gap-2.5 mb-4">
             <Card className="flex-1">
               <p className="text-xs text-brand-muted mb-1">
-                {retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
-                <InfoIcon
+                <RotuloInfo
                   titulo={retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
                   texto={
                     retencaoFonte
                       ? 'Já entregue pelo cliente ao Estado — não chega a ser depositado na tua conta.'
                       : 'Este valor chega à tua conta agora, mas continua a ser devido — vais ter de o pagar depois (na declaração de IRS ou em pagamentos por conta).'
                   }
-                />
+                >
+                  {retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
+                </RotuloInfo>
               </p>
               <p className="text-lg font-semibold text-gray-900">{irsSobreBruto.toFixed(2)} €</p>
             </Card>
 
             <Card className="flex-1">
               <p className="text-xs text-brand-muted mb-1">
-                Segurança Social
-                <InfoIcon
+                <RotuloInfo
                   titulo="Segurança Social"
                   texto="É a tua contribuição mensal que te dá direito a subsídios e à reforma no futuro. Calcula-se sobre 70% da tua faturação, não sobre o valor todo."
-                />
+                >
+                  Segurança Social
+                </RotuloInfo>
               </p>
               <p className="text-lg font-semibold text-gray-900">{ssSobreBruto.toFixed(2)} €</p>
             </Card>

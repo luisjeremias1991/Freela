@@ -15,7 +15,7 @@ import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import PageTitle from '../components/ui/PageTitle'
 import Input from '../components/ui/Input'
-import InfoIcon from '../components/ui/InfoIcon'
+import RotuloInfo from '../components/ui/RotuloInfo'
 
 // Junta uma lista em português, com "e" antes do último item — usado na
 // linha explicativa do cartão "Lucro líquido real".
@@ -493,37 +493,37 @@ export default function Painel() {
             <p className="text-xs text-brand-muted mb-3">Estimativas — confirma sempre com o teu contabilista.</p>
 
             <div className="flex justify-between items-center py-2 border-b border-brand-line text-sm">
-              <span className="text-brand-muted">
+              <RotuloInfo
+                className="text-brand-muted"
+                titulo="Limite de isenção de IVA"
+                texto="É o valor de faturação anual a partir do qual deixas de poder estar isento de IVA. Ao ultrapassá-lo, passas automaticamente para o regime normal e tens de começar a cobrar e entregar IVA nos teus recibos."
+              >
                 IVA
-                <InfoIcon
-                  titulo="Limite de isenção de IVA"
-                  texto="É o valor de faturação anual a partir do qual deixas de poder estar isento de IVA. Ao ultrapassá-lo, passas automaticamente para o regime normal e tens de começar a cobrar e entregar IVA nos teus recibos."
-                />
-              </span>
+              </RotuloInfo>
               <strong className="text-gray-900">{ivaAPorDeLado.toFixed(2)} €</strong>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-brand-line text-sm">
-              <span className="text-brand-muted">
+              <RotuloInfo
+                className="text-brand-muted"
+                titulo="Segurança Social"
+                texto="É a tua contribuição obrigatória, entregue trimestralmente. Não é descontada pelo cliente — tens de a pagar tu, a partir do que recebeste."
+              >
                 Segurança Social
-                <InfoIcon
-                  titulo="Segurança Social"
-                  texto="É a tua contribuição obrigatória, entregue trimestralmente. Não é descontada pelo cliente — tens de a pagar tu, a partir do que recebeste."
-                />
-              </span>
+              </RotuloInfo>
               <strong className="text-gray-900">{ssAPorDeLado.toFixed(2)} €</strong>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-brand-line text-sm">
-              <span className="text-brand-muted">
+              <RotuloInfo
+                className="text-brand-muted"
+                titulo="Pagamentos por conta"
+                texto={
+                  pagamentosPorContaDefinidoEsteAno
+                    ? 'Valor inserido manualmente por ti no Perfil, a partir da Demonstração de Liquidação de IRS do ano anterior — a app não consegue calcular isto sozinha. Está dividido em 3 prestações, com prazo a 20 de julho, 20 de setembro e 20 de dezembro, já criadas em Prazos.'
+                    : 'É um adiantamento de IRS pago em 3 prestações (julho, setembro, dezembro), calculado a partir da tua Demonstração de Liquidação de IRS do ano anterior, no Portal das Finanças — só tu tens acesso a esse valor, por isso introduz-o no Perfil assim que o souberes.'
+                }
+              >
                 Pagamentos por conta
-                <InfoIcon
-                  titulo="Pagamentos por conta"
-                  texto={
-                    pagamentosPorContaDefinidoEsteAno
-                      ? 'Valor inserido manualmente por ti no Perfil, a partir da Demonstração de Liquidação de IRS do ano anterior — a app não consegue calcular isto sozinha. Está dividido em 3 prestações, com prazo a 20 de julho, 20 de setembro e 20 de dezembro, já criadas em Prazos.'
-                      : 'É um adiantamento de IRS pago em 3 prestações (julho, setembro, dezembro), calculado a partir da tua Demonstração de Liquidação de IRS do ano anterior, no Portal das Finanças — só tu tens acesso a esse valor, por isso introduz-o no Perfil assim que o souberes.'
-                  }
-                />
-              </span>
+              </RotuloInfo>
               {pagamentosPorContaDefinidoEsteAno ? (
                 <strong className="text-gray-900">
                   {pagamentosPorContaIsento ? 'Isento este ano' : `${pagamentosPorConta.toFixed(2)} €`}
@@ -538,13 +538,13 @@ export default function Painel() {
               )}
             </div>
             <div className="flex justify-between items-center py-2 text-sm">
-              <span className="text-brand-muted">
+              <RotuloInfo
+                className="text-brand-muted"
+                titulo="IRS a pagar (sem retenção)"
+                texto="Quando um cliente não desconta IRS no momento do pagamento, esse valor não desaparece — fica para pagares de uma vez na declaração anual de IRS, no ano seguinte."
+              >
                 IRS a pagar (sem retenção)
-                <InfoIcon
-                  titulo="IRS a pagar (sem retenção)"
-                  texto="Quando um cliente não desconta IRS no momento do pagamento, esse valor não desaparece — fica para pagares de uma vez na declaração anual de IRS, no ano seguinte."
-                />
-              </span>
+              </RotuloInfo>
               <strong className="text-gray-900">{irsSemRetencaoAPorDeLado.toFixed(2)} €</strong>
             </div>
           </Card>

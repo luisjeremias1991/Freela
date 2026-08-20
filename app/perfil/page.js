@@ -12,7 +12,7 @@ import Label from '../components/ui/Label'
 import Input from '../components/ui/Input'
 import Select from '../components/ui/Select'
 import Modal from '../components/ui/Modal'
-import InfoIcon from '../components/ui/InfoIcon'
+import RotuloInfo from '../components/ui/RotuloInfo'
 
 function formatarDataPT(dataStr) {
   if (!dataStr) return ''
@@ -380,11 +380,12 @@ export default function Perfil() {
 
         <div>
           <Label htmlFor="data-inicio">
-            Data de início de atividade
-            <InfoIcon
+            <RotuloInfo
               titulo="Data de início de atividade"
               texto="Determina se estás no teu 1º ano de atividade, período em que estás isento de pagar Segurança Social. Essa isenção acaba automaticamente a partir do 12º mês."
-            />
+            >
+              Data de início de atividade
+            </RotuloInfo>
           </Label>
           <Input
             id="data-inicio"
@@ -396,11 +397,12 @@ export default function Perfil() {
 
         <div>
           <Label htmlFor="categoria">
-            Categoria de atividade
-            <InfoIcon
+            <RotuloInfo
               titulo="Categoria de atividade (coeficiente)"
               texto="É a percentagem do que faturas que conta como &quot;lucro&quot; para efeitos de impostos — o resto é tratado como despesa automática, mesmo que não a tenhas tido. Profissões liberais têm coeficiente mais alto (75%), o que costuma significar pagar mais impostos sobre o mesmo valor faturado do que, por exemplo, quem vende mercadorias (15%)."
-            />
+            >
+              Categoria de atividade
+            </RotuloInfo>
           </Label>
           <Select id="categoria" value={categoriaCoeficiente} onChange={(e) => setCategoriaCoeficiente(e.target.value)}>
             <option value="0.75">Profissão liberal (75%)</option>
@@ -411,11 +413,12 @@ export default function Perfil() {
 
         <div>
           <Label htmlFor="regime-iva">
-            Regime de IVA
-            <InfoIcon
+            <RotuloInfo
               titulo="Regime de IVA"
               texto="Isento (art. 53º) significa que não cobras IVA aos teus clientes — só podes escolher isto se faturares abaixo de um limite anual. Regime normal significa que cobras IVA nos teus recibos e depois entregas esse valor ao Estado; não é dinheiro teu, só passa pela tua conta."
-            />
+            >
+              Regime de IVA
+            </RotuloInfo>
           </Label>
           <Select id="regime-iva" value={regimeIva} onChange={(e) => setRegimeIva(e.target.value)}>
             <option value="isento">Isento</option>
@@ -425,11 +428,12 @@ export default function Perfil() {
 
         <div>
           <Label htmlFor="taxa-ss">
-            Taxa de Segurança Social
-            <InfoIcon
+            <RotuloInfo
               titulo="Taxa de Segurança Social"
               texto="É a percentagem que pagas sobre o rendimento relevante. A taxa de 25,2% dá mais proteção social (por exemplo, um subsídio de doença mais alto), mas custa mais por mês do que a taxa padrão de 21,4%."
-            />
+            >
+              Taxa de Segurança Social
+            </RotuloInfo>
           </Label>
           <Select id="taxa-ss" value={taxaSS} onChange={(e) => setTaxaSS(e.target.value)}>
             <option value="0.214">21,4%</option>
@@ -446,11 +450,12 @@ export default function Perfil() {
             className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="acumula-outro-trabalho" className="cursor-pointer">
-            Acumula com trabalho por conta de outrem
-            <InfoIcon
+            <RotuloInfo
               titulo="Acumula com trabalho por conta de outrem"
               texto="Se já descontas para a Segurança Social através de um emprego por conta de outrem, podes ficar isento de descontar também como independente, dependendo da tua situação em concreto."
-            />
+            >
+              Acumula com trabalho por conta de outrem
+            </RotuloInfo>
           </label>
         </div>
 
@@ -463,11 +468,12 @@ export default function Perfil() {
             className="accent-brand-primary w-4 h-4 mt-0.5 shrink-0"
           />
           <label htmlFor="pensionista" className="cursor-pointer">
-            É pensionista
-            <InfoIcon
+            <RotuloInfo
               titulo="Pensionista / reformado"
               texto="Quem já é pensionista e também trabalha como independente está, geralmente, isento de descontar para a Segurança Social nesta atividade."
-            />
+            >
+              É pensionista
+            </RotuloInfo>
           </label>
         </div>
 

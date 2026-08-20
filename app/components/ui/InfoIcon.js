@@ -3,6 +3,10 @@
 import { useState } from 'react'
 import Modal from './Modal'
 
+// Só o ícone/botão + o modal que abre ao clicar — não sabe nada sobre o texto
+// do rótulo ao lado. Para o "i" ficar sempre alinhado com o rótulo (mesmo que
+// este quebre para uma 2ª linha), usa sempre através de RotuloInfo.js, nunca
+// solto dentro do texto de um <label>/<p>.
 export default function InfoIcon({ titulo, texto }) {
   const [aberto, setAberto] = useState(false)
 
@@ -20,7 +24,7 @@ export default function InfoIcon({ titulo, texto }) {
         type="button"
         onClick={abrir}
         aria-label={`Mais informação: ${titulo}`}
-        className="inline-flex items-center justify-center w-8 h-8 -my-1.5 ml-1 rounded-full text-brand-primary cursor-pointer align-middle shrink-0"
+        className="inline-flex items-center justify-center w-8 h-8 rounded-full text-brand-primary cursor-pointer shrink-0"
       >
         <span className="w-5 h-5 rounded-full border border-brand-primary text-[11px] leading-none font-bold flex items-center justify-center">
           i
