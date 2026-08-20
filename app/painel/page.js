@@ -4,16 +4,33 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
 import { usePerfil } from '../context/PerfilContext'
+import {
+  calcularFaturado,
+  somarFaturado,
+  somarRecebido,
+  somarPorDeLado,
+  calcularLucroLiquido
+} from '../../lib/calculosFinanceiros'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import PageTitle from '../components/ui/PageTitle'
 import Input from '../components/ui/Input'
 import InfoIcon from '../components/ui/InfoIcon'
 
+// Junta uma lista em português, com "e" antes do último item — usado na
+// linha explicativa do cartão "Lucro líquido real".
+function juntarComE(itens) {
+  if (itens.length === 0) return ''
+  if (itens.length === 1) return itens[0]
+  return `${itens.slice(0, -1).join(', ')} e ${itens[itens.length - 1]}`
+}
+
+// Ranking por faturado (todos os recibos, pagos ou não) — ver rótulo
+// "Principais clientes (faturado)" no JSX, tornado explícito na auditoria.
 function topClientes(recibos) {
   const totaisPorCliente = {}
   recibos.forEach((r) => {
-    totaisPorCliente[r.cliente] = (totaisPorCliente[r.cliente] || 0) + r.valor
+    totaisPorCliente[r.cliente] = (totaisPorCliente[r.cliente] || 0) + calcularFaturado(r)
   })
 
   return Object.entries(totaisPorCliente)
@@ -68,13 +85,13 @@ function gerarMesesDoPeriodo(periodo) {
   return meses
 }
 
-// Soma o "valor" dos recibos (por data_emissao) em cada mês da lista.
+// Soma o faturado (por data_emissao) em cada mês da lista.
 function totaisPorMes(recibos, meses) {
   const somaPorChave = {}
   recibos.forEach((r) => {
     if (!r.data_emissao) return
     const chave = r.data_emissao.slice(0, 7) // 'YYYY-MM-DD' → 'YYYY-MM'
-    somaPorChave[chave] = (somaPorChave[chave] || 0) + r.valor
+    somaPorChave[chave] = (somaPorChave[chave] || 0) + calcularFaturado(r)
   })
 
   return meses.map((m) => ({ ...m, total: somaPorChave[m.chave] || 0 }))
@@ -221,6 +238,8 @@ export default function Painel() {
 
   const [periodoFaturacao, setPeriodoFaturacao] = useState('anoCorrente')
 
+  const [despesasPessoais, setDespesasPessoais] = useState([])
+
   async function carregarDespesas(userId) {
     const { data } = await supabase
       .from('despesas')
@@ -229,6 +248,23 @@ export default function Painel() {
       .order('data', { ascending: false })
 
     setDespesas(data || [])
+  }
+
+  // Tabela própria do Orçamento pessoal (app/orcamento/page.js) — distinta de
+  // "despesas" (despesas da atividade, Pro). Só precisamos dela aqui para o
+  // cartão-resumo "Sobra real este mês", por isso não pagina/ordena nada.
+  async function carregarDespesasPessoais(userId) {
+    const { data, error } = await supabase
+      .from('despesas_pessoais')
+      .select('*')
+      .eq('user_id', userId)
+
+    if (error) {
+      console.error('Erro ao carregar despesas pessoais:', error.message)
+      setDespesasPessoais([])
+    } else {
+      setDespesasPessoais(data || [])
+    }
   }
 
   async function carregarContabilistas() {
@@ -259,6 +295,7 @@ export default function Painel() {
 
       setRecibos(data || [])
       await carregarDespesas(user.id)
+      await carregarDespesasPessoais(user.id)
       setCarregando(false)
     }
     carregar()
@@ -291,29 +328,71 @@ export default function Painel() {
     }
   }
 
-  const total = recibos.reduce((soma, r) => soma + r.valor, 0)
-  // "Recebido" é derivado de data_pagamento — se estiver preenchida, o recibo está pago.
-  const recebido = recibos
-    .filter((r) => !!r.data_pagamento)
-    .reduce((soma, r) => soma + r.valor, 0)
-  // cálculo simplificado — 11,5% de IRS (só se retencao=true) + 21,4% de SS sobre 70% do valor
-  const liquido = recibos.reduce((soma, r) => {
-    const irs = r.retencao ? r.valor * 0.115 : 0
-    const ss = r.valor * 0.70 * 0.214
-    return soma + (r.valor - irs - ss)
-  }, 0)
+  // Todos os cálculos de faturado/recebido/IVA/SS/IRS vivem agora num único
+  // sítio (lib/calculosFinanceiros.js), testado à parte — ver
+  // __tests__/calculosFinanceiros.test.js. Esta página só decide o ÂMBITO
+  // (todos os recibos pagos vs só os pagos este mês) e passa-o às funções.
+  const recibosPagos = recibos.filter((r) => !!r.data_pagamento)
 
-  // "Pôr de lado" — estimativas simplificadas:
-  // IVA: 23% do faturado se o regime de IVA for "normal" (0 se isento)
-  // Segurança Social: sempre 70% do valor de cada recibo × taxa_ss do perfil (independente da categoria/coeficiente)
-  // IRS a pagar: 11,5% sobre os recibos sem retenção na fonte (o freelancer é que tem de entregar esse IRS)
-  // Pagamentos por conta: depende do imposto liquidado no ano anterior, que esta app ainda não tem — mostrado como indisponível
-  const taxaSS = perfil?.taxa_ss != null ? perfil.taxa_ss : 0.214
-  const ivaAPorDeLado = perfil?.regime_iva === 'normal' ? total * 0.23 : 0
-  const ssAPorDeLado = recibos.reduce((soma, r) => soma + r.valor * 0.70 * taxaSS, 0)
-  const irsSemRetencaoAPorDeLado = recibos
-    .filter((r) => !r.retencao)
-    .reduce((soma, r) => soma + r.valor, 0) * 0.115
+  const total = somarFaturado(recibos)
+  const recebido = somarRecebido(recibos)
+
+  // "Pôr de lado" — estimativas simplificadas, sempre com base no que já foi
+  // RECEBIDO: um recibo faturado mas ainda não pago não gera nenhuma
+  // obrigação a pôr de lado nem entra no lucro líquido, porque ainda não há
+  // dinheiro nenhum para pôr de lado (decisão da auditoria de cálculos
+  // financeiros — antes este cartão usava o faturado todo, o que inflacionava
+  // "Pôr de lado" e desalinhava "Lucro líquido real" para quem tivesse
+  // recibos por pagar).
+  const porDeLado = somarPorDeLado(recibosPagos, perfil)
+  const ivaAPorDeLado = porDeLado.iva
+  const ssAPorDeLado = porDeLado.ss
+  const irsSemRetencaoAPorDeLado = porDeLado.irs
+
+  // Pagamentos por conta — não é calculado pela app (ver Perfil), é sempre um
+  // valor introduzido manualmente pela pessoa, referente ao ano corrente
+  // (mesmo padrão de "ano" usado no resto da app: calculado com new Date(),
+  // nunca guardado como conceito à parte). Um valor de um ano anterior não
+  // conta como definido este ano.
+  const anoCorrente = new Date().getFullYear()
+  const pagamentosPorContaDefinidoEsteAno = perfil?.pagamentos_por_conta_ano === anoCorrente
+  const pagamentosPorContaIsento = pagamentosPorContaDefinidoEsteAno && !!perfil?.pagamentos_por_conta_isento
+  const pagamentosPorConta = pagamentosPorContaDefinidoEsteAno && !pagamentosPorContaIsento && perfil?.pagamentos_por_conta_valor != null
+    ? perfil.pagamentos_por_conta_valor
+    : 0
+
+  // "Lucro líquido real" — o número mais importante da página: o total
+  // recebido menos exatamente os mesmos valores do detalhe "Pôr de lado"
+  // logo abaixo (nada recalculado à parte, para os dois nunca poderem
+  // discordar entre si). A nota de "estimativa parcial" só aparece enquanto
+  // pagamentos por conta continuar por definir (nem valor, nem isenção) —
+  // uma vez resolvido de qualquer das formas, deixa de faltar informação.
+  const lucroLiquidoReal = calcularLucroLiquido(recibosPagos, perfil, pagamentosPorConta)
+
+  const componentesSubtraidosLucro = []
+  if (ivaAPorDeLado > 0) componentesSubtraidosLucro.push('IVA')
+  componentesSubtraidosLucro.push('Segurança Social')
+  if (irsSemRetencaoAPorDeLado > 0) componentesSubtraidosLucro.push('IRS')
+  if (pagamentosPorConta > 0) componentesSubtraidosLucro.push('Pagamentos por conta')
+  const textoSubtracaoLucro = `Recebido menos ${juntarComE(componentesSubtraidosLucro)}`
+
+  // "Sobra real este mês" — cartão do Orçamento pessoal, disponível no plano
+  // Grátis. Ao contrário do cartão "Pôr de lado" (Pro, acumulado desde sempre),
+  // este é sempre reduzido ao mês corrente: só recibos efetivamente recebidos
+  // este mês, a fatia desses recibos que ainda terás de pôr de lado para
+  // impostos, e as despesas pessoais lançadas este mês.
+  const hoje = new Date()
+  const chaveMesAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`
+
+  // Mesma convenção: filtra o âmbito aqui (recibos pagos este mês) e entrega
+  // às mesmas funções partilhadas — nenhuma fórmula própria escrita de novo.
+  const recibosPagosMesAtual = recibosPagos.filter((r) => r.data_pagamento.slice(0, 7) === chaveMesAtual)
+  const recebidoMesAtual = somarRecebido(recibosPagosMesAtual)
+  const porDeLadoMesAtual = somarPorDeLado(recibosPagosMesAtual, perfil)
+  const despesasPessoaisMesAtual = despesasPessoais
+    .filter((d) => d.data && d.data.slice(0, 7) === chaveMesAtual)
+    .reduce((soma, d) => soma + d.valor, 0)
+  const sobraRealMesAtual = recebidoMesAtual - porDeLadoMesAtual.total - despesasPessoaisMesAtual
 
   const clientesPrincipais = topClientes(recibos)
 
@@ -331,6 +410,15 @@ export default function Painel() {
     <div className="max-w-md mx-auto px-5 py-10">
       <PageTitle>Painel</PageTitle>
 
+      <Card className="mb-4 border-2 border-brand-navy">
+        <p className="text-sm text-brand-muted mb-1">Lucro líquido real</p>
+        <p className="text-3xl font-bold text-gray-900">{lucroLiquidoReal.toFixed(2)} €</p>
+        <p className="text-xs text-brand-muted mt-2">{textoSubtracaoLucro}</p>
+        {!pagamentosPorContaDefinidoEsteAno && (
+          <p className="text-xs text-brand-muted mt-1">* sem pagamentos por conta, ainda não calculados</p>
+        )}
+      </Card>
+
       <Card className="mb-4">
         <p className="text-sm text-brand-muted mb-1">Total faturado</p>
         <p className="text-2xl font-bold text-gray-900">{total.toFixed(2)} €</p>
@@ -339,11 +427,6 @@ export default function Painel() {
       <Card className="mb-4">
         <p className="text-sm text-brand-muted mb-1">Total recebido</p>
         <p className="text-2xl font-bold text-gray-900">{recebido.toFixed(2)} €</p>
-      </Card>
-
-      <Card className="mb-4">
-        <p className="text-sm text-brand-muted mb-1">Estimativa líquida</p>
-        <p className="text-2xl font-bold text-gray-900">{liquido.toFixed(2)} €</p>
       </Card>
 
       <Card className="mb-4">
@@ -377,6 +460,15 @@ export default function Painel() {
         <GraficoFaturacaoMensal meses={mesesFaturacao} periodo={periodoFaturacao} />
       </Card>
 
+      <Card className="mb-4">
+        <h3 className="font-semibold text-gray-900 mb-1">Orçamento pessoal</h3>
+        <p className="text-sm text-brand-muted mb-1">Sobra real este mês</p>
+        <p className="text-2xl font-bold text-gray-900 mb-3">{sobraRealMesAtual.toFixed(2)} €</p>
+        <Link href="/orcamento" className="text-brand-navy font-semibold text-sm">
+          Ver orçamento completo →
+        </Link>
+      </Card>
+
       {!carregandoPerfil && perfil?.is_pro && (
         <>
           <Card className="mb-4">
@@ -408,10 +500,25 @@ export default function Painel() {
                 Pagamentos por conta
                 <InfoIcon
                   titulo="Pagamentos por conta"
-                  texto="É um mecanismo do regime de contabilidade organizada, para adiantar IRS ao longo do ano. No regime simplificado (o mais comum em recibos verdes) normalmente não se aplica — por isso aparece como &quot;ainda não disponível&quot; aqui."
+                  texto={
+                    pagamentosPorContaDefinidoEsteAno
+                      ? 'Valor inserido manualmente por ti no Perfil, a partir da Demonstração de Liquidação de IRS do ano anterior — a app não consegue calcular isto sozinha. Está dividido em 3 prestações, com prazo a 20 de julho, 20 de setembro e 20 de dezembro, já criadas em Prazos.'
+                      : 'É um adiantamento de IRS pago em 3 prestações (julho, setembro, dezembro), calculado a partir da tua Demonstração de Liquidação de IRS do ano anterior, no Portal das Finanças — só tu tens acesso a esse valor, por isso introduz-o no Perfil assim que o souberes.'
+                  }
                 />
               </span>
-              <strong className="text-brand-muted font-normal">Ainda não disponível</strong>
+              {pagamentosPorContaDefinidoEsteAno ? (
+                <strong className="text-gray-900">
+                  {pagamentosPorContaIsento ? 'Isento este ano' : `${pagamentosPorConta.toFixed(2)} €`}
+                </strong>
+              ) : (
+                <span className="text-right">
+                  <strong className="text-brand-muted font-normal block">Ainda não disponível</strong>
+                  <Link href="/perfil" className="text-xs text-brand-navy font-semibold">
+                    Já sabes o valor? Define aqui →
+                  </Link>
+                </span>
+              )}
             </div>
             <div className="flex justify-between items-center py-2 text-sm">
               <span className="text-brand-muted">
@@ -426,7 +533,7 @@ export default function Painel() {
           </Card>
 
           <Card className="mb-4">
-            <h3 className="font-semibold text-gray-900 mb-2">Principais clientes</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Principais clientes (faturado)</h3>
             {clientesPrincipais.length === 0 && <p className="text-sm text-brand-muted">Ainda não tens recibos suficientes.</p>}
             {clientesPrincipais.map((c) => (
               <div key={c.cliente} className="flex justify-between py-2 border-b border-brand-line text-sm last:border-0">

@@ -19,6 +19,14 @@ function formatarDataPT(dataStr) {
   return new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-PT')
 }
 
+// Rótulo (prefixo, usado para encontrar a obrigação já criada e atualizá-la
+// em vez de duplicar) e mês/dia de cada prestação de Pagamentos por conta.
+const PARCELAS_PPC = [
+  { rotulo: 'Pagamento por conta (1/3)', mesDia: '07-20' },
+  { rotulo: 'Pagamento por conta (2/3)', mesDia: '09-20' },
+  { rotulo: 'Pagamento por conta (3/3)', mesDia: '12-20' }
+]
+
 const FUNCIONALIDADES_PRO = [
   'Notificações automáticas de prazos (email + WhatsApp)',
   'Alerta de proximidade de limites fiscais',
@@ -51,6 +59,17 @@ export default function Perfil() {
   const [passkeyAtiva, setPasskeyAtiva] = useState(false)
   const [aProcessarPasskey, setAProcessarPasskey] = useState(false)
   const [mensagemPasskey, setMensagemPasskey] = useState('')
+
+  // Pagamentos por conta — sempre referente ao ano corrente (mesmo padrão do
+  // resto da app: um ano "atual" calculado com new Date(), nunca guardado
+  // como um conceito à parte). Um valor guardado para um ano anterior não
+  // conta como definido este ano — ver carregarPerfil().
+  const anoCorrente = new Date().getFullYear()
+  const [ppcIsento, setPpcIsento] = useState(false)
+  const [ppcValor, setPpcValor] = useState('')
+  const [ppcDefinidoEsteAno, setPpcDefinidoEsteAno] = useState(false)
+  const [aGuardarPpc, setAGuardarPpc] = useState(false)
+  const [mensagemPpc, setMensagemPpc] = useState('')
 
   useEffect(() => {
     // Só se sabe com certeza depois de montar (depende de window/navigator),
@@ -115,6 +134,15 @@ export default function Perfil() {
       setTaxaSS(perfil.taxa_ss != null ? String(perfil.taxa_ss) : '0.214')
       setAcumulaOutroTrabalho(!!perfil.acumula_outro_trabalho)
       setPensionista(!!perfil.pensionista)
+
+      const definidoEsteAno = perfil.pagamentos_por_conta_ano === anoCorrente
+      setPpcDefinidoEsteAno(definidoEsteAno)
+      setPpcIsento(definidoEsteAno && !!perfil.pagamentos_por_conta_isento)
+      setPpcValor(
+        definidoEsteAno && perfil.pagamentos_por_conta_valor != null
+          ? String(perfil.pagamentos_por_conta_valor)
+          : ''
+      )
     }
     setCarregando(false)
   }
@@ -147,6 +175,87 @@ export default function Perfil() {
     } else {
       setMensagem('Perfil guardado!')
     }
+  }
+
+  // Cria ou atualiza (nunca duplica) as 3 obrigações de "Pagamento por conta"
+  // em Prazos, uma por prestação, com data e valor (total ÷ 3) já no nome —
+  // a tabela "obrigacoes" não tem coluna própria para valor, e o resto da app
+  // (lembrete por email) já lê só "nome" + "data", por isso seguimos o mesmo
+  // padrão em vez de criar um conceito novo. Faz update em vez de apagar +
+  // recriar para não perder o estado "concluído" se a pessoa já tiver
+  // marcado alguma prestação como paga antes de corrigir o valor.
+  async function sincronizarPrazosPagamentosPorConta(userId, ano, valorTotal) {
+    const valorParcela = valorTotal / 3
+
+    const { data: existentes } = await supabase
+      .from('obrigacoes')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('data', `${ano}-01-01`)
+      .lte('data', `${ano}-12-31`)
+      .ilike('nome', 'Pagamento por conta%')
+
+    for (const parcela of PARCELAS_PPC) {
+      const nome = `${parcela.rotulo} — ${valorParcela.toFixed(2)} €`
+      const data = `${ano}-${parcela.mesDia}`
+      const existente = (existentes || []).find((o) => o.nome.startsWith(parcela.rotulo))
+
+      if (existente) {
+        await supabase.from('obrigacoes').update({ nome, data }).eq('id', existente.id)
+      } else {
+        await supabase.from('obrigacoes').insert({ user_id: userId, nome, data, done: false })
+      }
+    }
+  }
+
+  async function removerPrazosPagamentosPorConta(userId, ano) {
+    await supabase
+      .from('obrigacoes')
+      .delete()
+      .eq('user_id', userId)
+      .gte('data', `${ano}-01-01`)
+      .lte('data', `${ano}-12-31`)
+      .ilike('nome', 'Pagamento por conta%')
+  }
+
+  async function guardarPagamentosPorConta() {
+    setMensagemPpc('')
+
+    if (!ppcIsento && (!ppcValor || parseFloat(ppcValor) <= 0)) {
+      setMensagemPpc('Introduz o valor total anual, ou marca que estás isento este ano.')
+      return
+    }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    setAGuardarPpc(true)
+
+    const { error } = await supabase.from('perfis').upsert({
+      id: user.id,
+      pagamentos_por_conta_ano: anoCorrente,
+      pagamentos_por_conta_valor: ppcIsento ? null : parseFloat(ppcValor),
+      pagamentos_por_conta_isento: ppcIsento
+    }, { onConflict: 'id' })
+
+    if (error) {
+      setAGuardarPpc(false)
+      setMensagemPpc('Erro ao guardar: ' + error.message)
+      return
+    }
+
+    if (ppcIsento) {
+      await removerPrazosPagamentosPorConta(user.id, anoCorrente)
+    } else {
+      await sincronizarPrazosPagamentosPorConta(user.id, anoCorrente, parseFloat(ppcValor))
+    }
+
+    setPpcDefinidoEsteAno(true)
+    setAGuardarPpc(false)
+    setMensagemPpc(
+      ppcIsento
+        ? 'Guardado! Já não vais ver prazos de pagamento por conta este ano.'
+        : 'Guardado! As 3 prestações foram criadas em Prazos.'
+    )
+    recarregarPerfil()
   }
 
   async function subscreverPro() {
@@ -355,6 +464,56 @@ export default function Perfil() {
       </Card>
 
       {mensagem && <p className="text-sm text-brand-muted mb-8 -mt-4">{mensagem}</p>}
+
+      <h2 className="text-lg font-semibold text-gray-900 mb-3">Pagamentos por conta ({anoCorrente})</h2>
+      <Card className="mb-8">
+        <p className="text-sm text-brand-muted mb-4">
+          A app não consegue calcular isto sozinha — o valor só existe na Demonstração de Liquidação de IRS
+          do ano anterior, no Portal das Finanças. Introduz aqui o valor total anual assim que o souberes.
+        </p>
+
+        <div className="flex items-start gap-2.5 text-sm text-gray-900 mb-4">
+          <input
+            id="ppc-isento"
+            type="checkbox"
+            checked={ppcIsento}
+            onChange={(e) => setPpcIsento(e.target.checked)}
+            className="accent-brand-navy w-4 h-4 mt-0.5 shrink-0"
+          />
+          <label htmlFor="ppc-isento" className="cursor-pointer">
+            Não sou obrigado a pagamentos por conta este ano
+          </label>
+        </div>
+
+        {!ppcIsento && (
+          <div className="mb-4">
+            <Label htmlFor="ppc-valor">Valor total anual (€)</Label>
+            <Input
+              id="ppc-valor"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="Valor total anual (€)"
+              value={ppcValor}
+              onChange={(e) => setPpcValor(e.target.value)}
+            />
+          </div>
+        )}
+
+        <Button onClick={guardarPagamentosPorConta} disabled={aGuardarPpc}>
+          {aGuardarPpc ? 'A guardar...' : 'Guardar'}
+        </Button>
+
+        {ppcDefinidoEsteAno && !mensagemPpc && (
+          <p className="text-xs text-brand-muted mt-3">
+            {ppcIsento
+              ? 'Isento este ano.'
+              : 'Já definido este ano — as 3 prestações estão em Prazos.'}
+          </p>
+        )}
+
+        {mensagemPpc && <p className="text-sm text-brand-muted mt-3">{mensagemPpc}</p>}
+      </Card>
 
       <h2 className="text-lg font-semibold text-gray-900 mb-3">Acesso rápido</h2>
       <Card className="mb-8">
