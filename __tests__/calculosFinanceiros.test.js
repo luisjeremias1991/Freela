@@ -99,6 +99,24 @@ describe('calcularSSRecibo', () => {
   it('recibo pendente → 0', () => {
     expect(calcularSSRecibo(recibo({ valor: 1000, data_pagamento: null }), { taxa_ss: 0.214 })).toBe(0)
   })
+
+  it('categoria do recibo tem prioridade sobre a do perfil', () => {
+    // Perfil é "profissão liberal" (70%), mas este recibo específico foi
+    // marcado como "venda de mercadorias" (20%) — o recibo ganha.
+    const resultado = calcularSSRecibo(
+      recibo({ valor: 1000, categoria_coeficiente: 0.15 }),
+      { taxa_ss: 0.214, categoria_coeficiente: 0.75 }
+    )
+    expect(resultado).toBeCloseTo(1000 * 0.20 * 0.214, 2)
+  })
+
+  it('recibo sem categoria própria (antigo, criado antes deste campo existir) → usa a do perfil', () => {
+    const resultado = calcularSSRecibo(
+      recibo({ valor: 1000 }), // sem categoria_coeficiente
+      { taxa_ss: 0.214, categoria_coeficiente: 0.15 }
+    )
+    expect(resultado).toBeCloseTo(1000 * 0.20 * 0.214, 2)
+  })
 })
 
 describe('calcularIrsRecibo', () => {

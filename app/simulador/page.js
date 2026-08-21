@@ -44,7 +44,7 @@ export default function Simulador() {
   // atividade do Perfil. A taxa de SS em si (21,4%) continua fixa aqui — não
   // lê perfil.taxa_ss, por decisão explícita de deixar essa parte para outra
   // tarefa.
-  const percentagemRendimentoRelevante = percentagemRendimentoRelevanteSS(perfil)
+  const percentagemRendimentoRelevante = percentagemRendimentoRelevanteSS(null, perfil)
   const taxaSS = primeiroAno ? 0 : percentagemRendimentoRelevante * 0.214
 
   // "Valor da proposta" / "Valor bruto necessário" são sempre valores SEM

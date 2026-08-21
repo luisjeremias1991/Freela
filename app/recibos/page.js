@@ -70,6 +70,7 @@ export default function Recibos() {
   const [dataPagamento, setDataPagamento] = useState('')
   const [retencao, setRetencao] = useState(false)
   const [codigoCirs, setCodigoCirs] = useState('')
+  const [categoriaCoeficiente, setCategoriaCoeficiente] = useState('')
   const [editandoId, setEditandoId] = useState(null)
   const [mensagem, setMensagem] = useState('')
 
@@ -98,15 +99,17 @@ export default function Recibos() {
     carregarRecibos()
   }, [])
 
-  // Pré-preenche Taxa de IVA e Código CIRS a partir do Perfil, só enquanto
-  // estivermos a preparar um recibo NOVO (não a editar um já existente, que
-  // tem os seus próprios valores) — e só nos campos que ainda estiverem
-  // vazios, para nunca apagar algo que a pessoa já tenha escrito.
+  // Pré-preenche Taxa de IVA, Código CIRS e Categoria de atividade a partir
+  // do Perfil, só enquanto estivermos a preparar um recibo NOVO (não a
+  // editar um já existente, que tem os seus próprios valores) — e só nos
+  // campos que ainda estiverem vazios, para nunca apagar algo que a pessoa
+  // já tenha escrito/escolhido.
   useEffect(() => {
     if (editandoId) return
     if (!perfil) return
     setTaxaIva((atual) => atual || (perfil.regime_iva === 'normal' ? '0.23' : '0'))
     setCodigoCirs((atual) => atual || perfil.codigo_cirs || '')
+    setCategoriaCoeficiente((atual) => atual || (perfil.categoria_coeficiente != null ? String(perfil.categoria_coeficiente) : ''))
   }, [perfil, editandoId])
 
   function limparFormulario() {
@@ -119,6 +122,7 @@ export default function Recibos() {
     setDataPagamento('')
     setRetencao(false)
     setCodigoCirs('')
+    setCategoriaCoeficiente('')
     setEditandoId(null)
   }
 
@@ -133,6 +137,7 @@ export default function Recibos() {
     setDataPagamento(recibo.data_pagamento || '')
     setRetencao(!!recibo.retencao)
     setCodigoCirs(recibo.codigo_cirs || '')
+    setCategoriaCoeficiente(recibo.categoria_coeficiente != null ? String(recibo.categoria_coeficiente) : '')
     setMensagem('')
 
     // O formulário fica no topo da página — sem isto, preencher os campos
@@ -156,7 +161,8 @@ export default function Recibos() {
       data_emissao: dataEmissao,
       data_pagamento: dataPagamento || null,
       retencao: retencao,
-      codigo_cirs: codigoCirs || null
+      codigo_cirs: codigoCirs || null,
+      categoria_coeficiente: categoriaCoeficiente !== '' ? parseFloat(categoriaCoeficiente) : null
     }
 
     const { error } = editandoId
@@ -308,6 +314,19 @@ export default function Recibos() {
             value={codigoCirs}
             onChange={(e) => setCodigoCirs(e.target.value)}
           />
+        </div>
+
+        <div>
+          <Label htmlFor="categoria-recibo">Categoria de atividade</Label>
+          <Select
+            id="categoria-recibo"
+            value={categoriaCoeficiente}
+            onChange={(e) => setCategoriaCoeficiente(e.target.value)}
+          >
+            <option value="0.75">Profissão liberal — saúde, direito, desporto, artes, etc. (75%)</option>
+            <option value="0.35">Outros serviços (35%)</option>
+            <option value="0.15">Venda de mercadorias ou produtos, incluindo produção agrícola (15%)</option>
+          </Select>
         </div>
 
         <div className="flex gap-2.5">
