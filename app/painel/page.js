@@ -381,7 +381,7 @@ export default function Painel() {
   if (pagamentosPorConta > 0) componentesSubtraidosLucro.push('Pagamentos por conta')
   const textoSubtracaoLucro = `Recebido menos ${juntarComE(componentesSubtraidosLucro)}`
 
-  // "Sobra real este mês" — cartão do Orçamento pessoal, Recibos Claros Pro.
+  // "Sobra real este mês" — cartão do Orçamento pessoal, RC PRO.
   // Ao contrário do cartão "Pôr de lado" (também Pro, acumulado desde sempre),
   // este é sempre reduzido ao mês corrente: só recibos efetivamente recebidos
   // este mês, a fatia desses recibos que ainda terás de pôr de lado para
@@ -482,7 +482,7 @@ export default function Painel() {
           <p className="text-sm text-brand-muted mb-3">
             Vê quanto te sobra mesmo este mês, depois de impostos e despesas pessoais.
           </p>
-          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver Recibos Claros Pro</Link>
+          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver RC PRO</Link>
         </Card>
       )}
 
@@ -611,7 +611,7 @@ export default function Painel() {
         <Card className="mb-4">
           <h3 className="font-semibold text-gray-900 mb-1">Funcionalidades Pro</h3>
           <p className="text-sm text-brand-muted mb-3">Desbloqueia &quot;Pôr de lado&quot;, principais clientes e despesas da atividade.</p>
-          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver Recibos Claros Pro</Link>
+          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver RC PRO</Link>
         </Card>
       )}
 
@@ -645,6 +645,37 @@ export default function Painel() {
           ))}
         </>
       )}
+
+      <h2 className="text-lg font-semibold text-gray-900 mb-3 mt-8">Acessos úteis</h2>
+      <Card className="mb-4">
+        <a
+          href="https://faturas.portaldasfinancas.gov.pt"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2.5 py-2.5 border-b border-brand-line text-sm text-gray-900 no-underline hover:text-brand-primary transition last:border-0"
+        >
+          <span aria-hidden="true">🧾</span>
+          Portal das Finanças (e-Fatura)
+        </a>
+        <a
+          href="https://app.seg-social.pt"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2.5 py-2.5 border-b border-brand-line text-sm text-gray-900 no-underline hover:text-brand-primary transition last:border-0"
+        >
+          <span aria-hidden="true">🏛️</span>
+          Segurança Social Direta
+        </a>
+        <a
+          href="https://siga.marcacaodeatendimento.pt/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2.5 py-2.5 border-b border-brand-line text-sm text-gray-900 no-underline hover:text-brand-primary transition last:border-0"
+        >
+          <span aria-hidden="true">📅</span>
+          Marcar atendimento (Siga)
+        </a>
+      </Card>
     </div>
   )
 }

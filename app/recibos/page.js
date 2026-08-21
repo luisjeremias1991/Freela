@@ -292,7 +292,7 @@ export default function Recibos() {
           href="/perfil#plano"
           className="block text-center py-2.5 mb-5 rounded-lg border border-brand-line text-brand-muted hover:border-brand-primary hover:text-brand-primary transition no-underline"
         >
-          🔒 Filtros de pesquisa (Recibos Claros Pro)
+          🔒 Filtros de pesquisa (RC PRO)
         </Link>
       )}
 
@@ -303,7 +303,7 @@ export default function Recibos() {
           href="/perfil#plano"
           className="block text-center py-2.5 mb-5 rounded-lg border border-brand-line text-brand-muted hover:border-brand-primary hover:text-brand-primary transition no-underline"
         >
-          🔒 Exportar CSV (Recibos Claros Pro)
+          🔒 Exportar CSV (RC PRO)
         </Link>
       )}
 

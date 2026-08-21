@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePerfil } from '../context/PerfilContext'
 import Card from '../components/ui/Card'
 import PageTitle from '../components/ui/PageTitle'
 import Label from '../components/ui/Label'
 import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
 import RotuloInfo from '../components/ui/RotuloInfo'
+import { percentagemRendimentoRelevanteSS, taxaRetencaoRegional } from '../../lib/calculosFinanceiros'
 
 export default function Simulador() {
   const { perfil, carregandoPerfil } = usePerfil()
@@ -16,6 +18,14 @@ export default function Simulador() {
   const [valor, setValor] = useState('')
   const [primeiroAno, setPrimeiroAno] = useState(true)
   const [retencaoFonte, setRetencaoFonte] = useState(true)
+  // Região fiscal — Açores/Madeira têm taxa de retenção de IRS reduzida por
+  // lei. Começa igual à do Perfil assim que este carrega (mesmo padrão do
+  // resto da app: um default sensato, mas continua editável só para esta
+  // simulação, tal como "1º ano de atividade"/"Cliente retém na fonte").
+  const [regiao, setRegiao] = useState('continente')
+  useEffect(() => {
+    if (perfil?.regiao) setRegiao(perfil.regiao)
+  }, [perfil])
   // Só relevante no modo Bruto → Líquido, com regime de IVA normal — no modo
   // inverso o valor introduzido é sempre o que a pessoa quer receber, que por
   // definição nunca inclui IVA (o IVA nunca é teu). Default false para não
@@ -23,8 +33,19 @@ export default function Simulador() {
   const [incluiIva, setIncluiIva] = useState(false)
 
   // Mesmas taxas usadas nos dois modos, para o cálculo inverso dar sempre o valor esperado.
-  const taxaIrs = primeiroAno ? 0.25 : 0.115
-  const taxaSS = primeiroAno ? 0 : 0.70 * 0.214
+  // taxaIrsContinente é a taxa "base" antes da redução regional; taxaIrs é a
+  // que entra de facto nos cálculos, já ajustada à região escolhida (Açores
+  // -20%, Madeira -30% — ver aviso em lib/calculosFinanceiros.js).
+  const taxaIrsContinente = primeiroAno ? 0.25 : 0.115
+  const taxaIrs = taxaRetencaoRegional(taxaIrsContinente, regiao)
+  // Percentagem do rendimento relevante para SS — 70% prestação de serviços,
+  // 20% venda de mercadorias — decidida pela mesma função partilhada usada em
+  // Painel/Orçamento (lib/calculosFinanceiros.js), a partir da categoria de
+  // atividade do Perfil. A taxa de SS em si (21,4%) continua fixa aqui — não
+  // lê perfil.taxa_ss, por decisão explícita de deixar essa parte para outra
+  // tarefa.
+  const percentagemRendimentoRelevante = percentagemRendimentoRelevanteSS(perfil)
+  const taxaSS = primeiroAno ? 0 : percentagemRendimentoRelevante * 0.214
 
   // "Valor da proposta" / "Valor bruto necessário" são sempre valores SEM
   // IVA (a tarifa/honorário) — o IVA soma-se por cima na fatura, nunca entra
@@ -33,7 +54,7 @@ export default function Simulador() {
   const taxaIva = perfil?.regime_iva === 'normal' ? 0.23 : 0
 
   // "Bruto → Líquido" é grátis, sempre acessível. Só "Líquido → Bruto" é
-  // Recibos Claros Pro — mas o próprio botão/pill fica sempre visível e
+  // RC PRO — mas o próprio botão/pill fica sempre visível e
   // clicável para todos (é o formulário que fica escondido atrás do
   // bloqueio, nunca a opção em si, senão quem é grátis nem sabe que existe).
   function selecionarModo(novoModo) {
@@ -59,7 +80,7 @@ export default function Simulador() {
   // de ser subtraído do líquido, exatamente como a Segurança Social (que
   // também nunca é retida pelo cliente e ainda assim é sempre subtraída).
   const irs = valorBase * taxaIrs
-  const ss = primeiroAno ? 0 : valorBase * 0.70 * 0.214
+  const ss = valorBase * taxaSS
   const liquido = valorBase - irs - ss
 
   // Fórmula de apoio mostrada por baixo do "Valor líquido" — começa sempre no
@@ -89,6 +110,10 @@ export default function Simulador() {
   const formulaBruto = taxaIva > 0
     ? `${valorNum.toFixed(2)} € (líquido desejado) + ${irsSobreBruto.toFixed(2)} € (IRS) + ${ssSobreBruto.toFixed(2)} € (SS) = ${brutoNecessario.toFixed(2)} € (sem IVA) + ${ivaSobreBruto.toFixed(2)} € (IVA) = ${totalFaturaBruto.toFixed(2)} € (a faturar)`
     : `${valorNum.toFixed(2)} € (líquido desejado) + ${irsSobreBruto.toFixed(2)} € (IRS) + ${ssSobreBruto.toFixed(2)} € (SS) = ${totalFaturaBruto.toFixed(2)} € (a faturar)`
+
+  // Mostra sempre a taxa de retenção efetivamente aplicada (já com a redução
+  // regional, se houver) junto ao valor — não só o valor calculado.
+  const rotuloIrs = `${retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'} (${(taxaIrs * 100).toFixed(1)}%)`
 
   if (carregandoPerfil) return <p className="p-5 text-brand-muted">A carregar...</p>
 
@@ -121,12 +146,12 @@ export default function Simulador() {
 
       {modoBloqueado ? (
         <Card>
-          <h3 className="font-semibold text-gray-900 mb-1">Funcionalidade Recibos Claros Pro</h3>
+          <h3 className="font-semibold text-gray-900 mb-1">Funcionalidade RC PRO</h3>
           <p className="text-sm text-brand-muted mb-4">
             O simulador inverso (líquido → bruto) está disponível no plano Pro — calcula quanto tens de faturar
             para atingir o líquido que queres receber.
           </p>
-          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver Recibos Claros Pro</Link>
+          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver RC PRO</Link>
         </Card>
       ) : (
       <>
@@ -177,6 +202,22 @@ export default function Simulador() {
           </label>
         </div>
 
+        <div>
+          <Label htmlFor="regiao-simulador">
+            <RotuloInfo
+              titulo="Região"
+              texto="Os Açores e a Madeira têm taxas de retenção de IRS reduzidas por lei, em relação ao Continente. Vem preenchido a partir do Perfil, mas podes mudar só para esta simulação."
+            >
+              Região
+            </RotuloInfo>
+          </Label>
+          <Select id="regiao-simulador" value={regiao} onChange={(e) => setRegiao(e.target.value)}>
+            <option value="continente">Continente</option>
+            <option value="acores">Açores</option>
+            <option value="madeira">Madeira</option>
+          </Select>
+        </div>
+
         <div className="flex items-start gap-2.5 text-sm text-gray-900">
           <input
             id="retencao-fonte-simulador"
@@ -194,6 +235,20 @@ export default function Simulador() {
             </RotuloInfo>
           </label>
         </div>
+
+        <p className="text-xs text-brand-muted">
+          A categoria de atividade do Perfil já entra na Segurança Social (decide se o rendimento relevante é
+          70% ou 20%) — mas não afeta a retenção nem o IRS anual (rendimento coletável), que dependem de outras
+          regras. Usa o checkbox acima para indicar diretamente se há retenção.
+        </p>
+
+        {regiao !== 'continente' && (
+          <p className="text-xs text-brand-muted">
+            ⚠️ A redução da taxa de retenção para {regiao === 'acores' ? 'Açores' : 'Madeira'} é uma
+            aproximação (não confirmada numa fonte oficial para retenção de Categoria B) — confirma o valor
+            exato com o teu contabilista antes de faturar com base nele.
+          </p>
+        )}
       </Card>
 
       {modo === 'brutoLiquido' ? (
@@ -232,14 +287,14 @@ export default function Simulador() {
               <Card className="flex-1">
                 <p className="text-xs text-brand-muted mb-1">
                   <RotuloInfo
-                    titulo={retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
+                    titulo={rotuloIrs}
                     texto={
                       retencaoFonte
                         ? 'Já entregue pelo cliente ao Estado — não chega a ser depositado na tua conta.'
                         : 'Este valor chega à tua conta agora, mas continua a ser devido — vais ter de o pagar depois (na declaração de IRS ou em pagamentos por conta).'
                     }
                   >
-                    {retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
+                    {rotuloIrs}
                   </RotuloInfo>
                 </p>
                 <p className="text-lg font-semibold text-gray-900">{irs.toFixed(2)} €</p>
@@ -249,7 +304,7 @@ export default function Simulador() {
                 <p className="text-xs text-brand-muted mb-1">
                   <RotuloInfo
                     titulo="Segurança Social"
-                    texto="É a tua contribuição mensal que te dá direito a subsídios e à reforma no futuro. Calcula-se sobre 70% da tua faturação, não sobre o valor todo."
+                    texto={`É a tua contribuição mensal que te dá direito a subsídios e à reforma no futuro. Calcula-se sobre ${(percentagemRendimentoRelevante * 100).toFixed(0)}% da tua faturação (rendimento relevante — varia consoante o tipo de atividade), não sobre o valor todo.`}
                   >
                     Segurança Social
                   </RotuloInfo>
@@ -299,14 +354,14 @@ export default function Simulador() {
             <Card className="flex-1">
               <p className="text-xs text-brand-muted mb-1">
                 <RotuloInfo
-                  titulo={retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
+                  titulo={rotuloIrs}
                   texto={
                     retencaoFonte
                       ? 'Já entregue pelo cliente ao Estado — não chega a ser depositado na tua conta.'
                       : 'Este valor chega à tua conta agora, mas continua a ser devido — vais ter de o pagar depois (na declaração de IRS ou em pagamentos por conta).'
                   }
                 >
-                  {retencaoFonte ? 'Retenção de IRS' : 'IRS a pagar (ainda não retido)'}
+                  {rotuloIrs}
                 </RotuloInfo>
               </p>
               <p className="text-lg font-semibold text-gray-900">{irsSobreBruto.toFixed(2)} €</p>
@@ -316,7 +371,7 @@ export default function Simulador() {
               <p className="text-xs text-brand-muted mb-1">
                 <RotuloInfo
                   titulo="Segurança Social"
-                  texto="É a tua contribuição mensal que te dá direito a subsídios e à reforma no futuro. Calcula-se sobre 70% da tua faturação, não sobre o valor todo."
+                  texto={`É a tua contribuição mensal que te dá direito a subsídios e à reforma no futuro. Calcula-se sobre ${(percentagemRendimentoRelevante * 100).toFixed(0)}% da tua faturação (rendimento relevante — varia consoante o tipo de atividade), não sobre o valor todo.`}
                 >
                   Segurança Social
                 </RotuloInfo>

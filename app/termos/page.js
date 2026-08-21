@@ -75,7 +75,7 @@ export default function Termos() {
         <section>
           <h2 className="font-bold text-base text-gray-900 mb-2">5. Plano Pro e pagamentos</h2>
           <p>
-            A subscrição Recibos Claros Pro é processada através da Stripe. Podes cancelar a qualquer momento — o
+            A subscrição RC PRO é processada através da Stripe. Podes cancelar a qualquer momento — o
             acesso Pro mantém-se ativo até ao fim do período já pago.
           </p>
         </section>

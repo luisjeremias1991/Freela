@@ -71,7 +71,22 @@ describe('calcularIvaRecibo', () => {
 })
 
 describe('calcularSSRecibo', () => {
-  it('recibo pago → 70% do valor × taxa_ss do perfil', () => {
+  it('recibo pago, profissão liberal (0.75) → 70% do valor × taxa_ss do perfil', () => {
+    const resultado = calcularSSRecibo(recibo({ valor: 1000 }), { taxa_ss: 0.214, categoria_coeficiente: 0.75 })
+    expect(resultado).toBeCloseTo(1000 * 0.70 * 0.214, 2)
+  })
+
+  it('recibo pago, outros serviços (0.35) → também 70% (é serviço, não bens)', () => {
+    const resultado = calcularSSRecibo(recibo({ valor: 1000 }), { taxa_ss: 0.214, categoria_coeficiente: 0.35 })
+    expect(resultado).toBeCloseTo(1000 * 0.70 * 0.214, 2)
+  })
+
+  it('recibo pago, venda de mercadorias (0.15) → 20% do valor, não 70%', () => {
+    const resultado = calcularSSRecibo(recibo({ valor: 1000 }), { taxa_ss: 0.214, categoria_coeficiente: 0.15 })
+    expect(resultado).toBeCloseTo(1000 * 0.20 * 0.214, 2)
+  })
+
+  it('perfil sem categoria_coeficiente definida → assume serviços (70%), não rebenta', () => {
     const resultado = calcularSSRecibo(recibo({ valor: 1000 }), { taxa_ss: 0.214 })
     expect(resultado).toBeCloseTo(1000 * 0.70 * 0.214, 2)
   })

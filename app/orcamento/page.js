@@ -120,7 +120,7 @@ export default function Orcamento() {
 
   if (carregando || carregandoPerfil) return <p className="p-5 text-brand-muted">A carregar...</p>
 
-  // Orçamento pessoal é Recibos Claros Pro — bloqueio à entrada da página
+  // Orçamento pessoal é RC PRO — bloqueio à entrada da página
   // inteira, para quem chegar aqui diretamente por URL sem passar pelo cartão
   // do Painel (que já nem mostra o link a quem não é Pro).
   if (!perfil?.is_pro) {
@@ -131,11 +131,11 @@ export default function Orcamento() {
         </Link>
         <PageTitle>Orçamento pessoal</PageTitle>
         <Card>
-          <h3 className="font-semibold text-gray-900 mb-1">Funcionalidade Recibos Claros Pro</h3>
+          <h3 className="font-semibold text-gray-900 mb-1">Funcionalidade RC PRO</h3>
           <p className="text-sm text-brand-muted mb-4">
             Vê quanto te sobra mesmo este mês, depois de impostos e despesas pessoais, com o Orçamento pessoal.
           </p>
-          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver Recibos Claros Pro</Link>
+          <Link href="/perfil#plano" className="text-brand-primary font-semibold text-sm">Ver RC PRO</Link>
         </Card>
       </div>
     )

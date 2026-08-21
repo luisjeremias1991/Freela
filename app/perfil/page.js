@@ -46,6 +46,7 @@ export default function Perfil() {
   const [categoriaCoeficiente, setCategoriaCoeficiente] = useState('0.75')
   const [regimeIva, setRegimeIva] = useState('isento')
   const [taxaSS, setTaxaSS] = useState('0.214')
+  const [regiao, setRegiao] = useState('continente')
   const [acumulaOutroTrabalho, setAcumulaOutroTrabalho] = useState(false)
   const [pensionista, setPensionista] = useState(false)
   const [mensagem, setMensagem] = useState('')
@@ -132,6 +133,7 @@ export default function Perfil() {
       setCategoriaCoeficiente(perfil.categoria_coeficiente != null ? String(perfil.categoria_coeficiente) : '0.75')
       setRegimeIva(perfil.regime_iva || 'isento')
       setTaxaSS(perfil.taxa_ss != null ? String(perfil.taxa_ss) : '0.214')
+      setRegiao(perfil.regiao || 'continente')
       setAcumulaOutroTrabalho(!!perfil.acumula_outro_trabalho)
       setPensionista(!!perfil.pensionista)
 
@@ -177,6 +179,7 @@ export default function Perfil() {
       categoria_coeficiente: parseFloat(categoriaCoeficiente),
       regime_iva: regimeIva,
       taxa_ss: parseFloat(taxaSS),
+      regiao: regiao,
       acumula_outro_trabalho: acumulaOutroTrabalho,
       pensionista: pensionista
     }, { onConflict: 'id' })
@@ -441,6 +444,22 @@ export default function Perfil() {
           </Select>
         </div>
 
+        <div>
+          <Label htmlFor="regiao">
+            <RotuloInfo
+              titulo="Região"
+              texto="As Regiões Autónomas dos Açores e da Madeira têm taxas de retenção de IRS reduzidas por lei, em relação ao Continente. Usado no Simulador para mostrar e aplicar a taxa correta."
+            >
+              Região
+            </RotuloInfo>
+          </Label>
+          <Select id="regiao" value={regiao} onChange={(e) => setRegiao(e.target.value)}>
+            <option value="continente">Continente</option>
+            <option value="acores">Açores</option>
+            <option value="madeira">Madeira</option>
+          </Select>
+        </div>
+
         <div className="flex items-start gap-2.5 text-sm text-gray-900">
           <input
             id="acumula-outro-trabalho"
@@ -574,13 +593,13 @@ export default function Perfil() {
         <Card className="mb-4">
           <h3 className="font-semibold text-gray-900 mb-1">Plano Grátis</h3>
           <p className="text-sm text-brand-muted mb-4">Estás a usar a versão gratuita da Recibos Claros.</p>
-          <Button onClick={() => setModalProAberto(true)}>Ver Recibos Claros Pro</Button>
+          <Button onClick={() => setModalProAberto(true)}>Ver RC PRO</Button>
         </Card>
       )}
 
       {!carregandoPerfil && perfil?.is_pro && !perfil?.pro_cancelled && (
         <Card className="mb-4 border-brand-primary">
-          <h3 className="font-semibold text-gray-900 mb-1">Recibos Claros Pro ativo</h3>
+          <h3 className="font-semibold text-gray-900 mb-1">RC PRO ativo</h3>
           <p className="text-sm text-brand-muted mb-4">Já tens acesso a todas as funcionalidades Pro.</p>
           <Button variant="secondary" onClick={cancelarSubscricao}>Cancelar subscrição</Button>
         </Card>
@@ -588,7 +607,7 @@ export default function Perfil() {
 
       {!carregandoPerfil && perfil?.is_pro && perfil?.pro_cancelled && (
         <Card className="mb-4 border-brand-primary">
-          <h3 className="font-semibold text-gray-900 mb-1">Recibos Claros Pro ativo</h3>
+          <h3 className="font-semibold text-gray-900 mb-1">RC PRO ativo</h3>
           <p className="text-sm text-brand-muted mb-4">
             Cancelamento agendado para {formatarDataPT(perfil.pro_ends_at)}. Continuas com acesso Pro até lá.
           </p>
@@ -599,7 +618,7 @@ export default function Perfil() {
       {mensagemPlano && <p className="text-sm text-brand-muted">{mensagemPlano}</p>}
 
       <Modal open={modalProAberto} onClose={() => setModalProAberto(false)}>
-        <h2 className="text-xl font-bold text-gray-900 mb-5">Recibos Claros Pro</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-5">RC PRO</h2>
 
         <div className="flex gap-2.5 mb-5">
           <button
@@ -620,7 +639,11 @@ export default function Perfil() {
                 : 'bg-white text-gray-900 border border-brand-line'
             }`}
           >
-            Anual — 50 €/ano
+            <span className="block">Anual — 50 €/ano</span>
+            {/* 12 × 4,99€ (mensal) − 50€ (anual) = 9,88€ poupados por ano */}
+            <span className={`block text-xs font-normal mt-0.5 ${cicloEscolhido === 'anual' ? 'text-white/80' : 'text-brand-muted'}`}>
+              Poupas 9,88 €/ano
+            </span>
           </button>
         </div>
 
@@ -633,7 +656,7 @@ export default function Perfil() {
         {mensagemPlano && <p className="text-sm text-brand-muted mb-4">{mensagemPlano}</p>}
 
         <div className="flex gap-2.5">
-          <Button className="flex-1" onClick={subscreverPro}>Subscrever Recibos Claros Pro</Button>
+          <Button className="flex-1" onClick={subscreverPro}>Subscrever RC PRO</Button>
           <Button variant="secondary" onClick={() => setModalProAberto(false)}>Fechar</Button>
         </div>
       </Modal>

@@ -27,7 +27,7 @@ export default function Prazos() {
   const [carregando, setCarregando] = useState(true)
 
   // A lista de prazos é sempre grátis — só isto (o envio automático de
-  // lembretes por email) é que é Recibos Claros Pro. Fonte única de verdade:
+  // lembretes por email) é que é RC PRO. Fonte única de verdade:
   // perfil.is_pro, tal como em todo o resto da app.
   const [notificacoesAtivas, setNotificacoesAtivas] = useState(false)
   const [aGuardarNotificacoes, setAGuardarNotificacoes] = useState(false)
@@ -147,7 +147,7 @@ export default function Prazos() {
           href="/perfil#plano"
           className="block text-center py-2.5 mb-6 rounded-lg border border-brand-line text-brand-muted hover:border-brand-primary hover:text-brand-primary transition no-underline"
         >
-          🔒 Notificações automáticas (Recibos Claros Pro)
+          🔒 Notificações automáticas (RC PRO)
         </Link>
       )}
 

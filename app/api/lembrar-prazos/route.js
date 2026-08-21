@@ -44,7 +44,7 @@ async function processarLembretes(request) {
     const hojeStr = formatarData(hoje)
     const daqui7DiasStr = formatarData(daqui7Dias)
 
-    // Notificações automáticas são Recibos Claros Pro, e dependem também do
+    // Notificações automáticas são RC PRO, e dependem também do
     // toggle em Prazos — perfis.is_pro continua a ser a única fonte de
     // verdade para "é Pro"; aqui só acrescentamos o segundo requisito
     // (preferência ligada) por cima, sem duplicar a lógica de is_pro em

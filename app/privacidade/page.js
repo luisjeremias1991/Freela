@@ -50,7 +50,7 @@ export default function Privacidade() {
           <h2 className="font-bold text-base text-gray-900 mb-2">3. Para que usamos estes dados</h2>
           <ul className="list-disc pl-5 space-y-1.5">
             <li>Fazer funcionar a aplicação (mostrar os teus recibos, calcular estimativas fiscais)</li>
-            <li>Processar a tua subscrição Recibos Claros Pro, através da Stripe</li>
+            <li>Processar a tua subscrição RC PRO, através da Stripe</li>
             <li>Enviar-te lembretes de prazos fiscais, se tiveres essa funcionalidade ativa</li>
             <li>Melhorar o produto (de forma agregada, não individual)</li>
           </ul>
