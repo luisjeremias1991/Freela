@@ -1,5 +1,6 @@
 import {
   TAXA_RETENCAO_PADRAO,
+  TAXA_SS_PADRAO,
   calcularFaturado,
   calcularRecebido,
   calcularIvaRecibo,
@@ -8,7 +9,9 @@ import {
   somarFaturado,
   somarRecebido,
   somarPorDeLado,
-  calcularLucroLiquido
+  calcularLucroLiquido,
+  calcularCenarioSimulador,
+  taxaRetencaoRegional
 } from '../lib/calculosFinanceiros'
 
 // Perfis de referência usados em vários testes.
@@ -182,6 +185,142 @@ describe('somarPorDeLado e calcularLucroLiquido — caso composto', () => {
   it('lista vazia → tudo a zero, sem rebentar', () => {
     expect(somarPorDeLado([], PERFIL_NORMAL)).toEqual({ iva: 0, ss: 0, irs: 0, total: 0 })
     expect(calcularLucroLiquido([], PERFIL_NORMAL, 0)).toBe(0)
+  })
+})
+
+describe('calcularCenarioSimulador', () => {
+  it('continente, não é 1º ano, profissão liberal — bate certo à mão', () => {
+    const resultado = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: false,
+      regiao: 'continente',
+      categoriaCoeficiente: 0.75,
+      taxaSSPerfil: 0.214
+    })
+    expect(resultado.taxaIrs).toBeCloseTo(0.115, 4)
+    expect(resultado.taxaSS).toBeCloseTo(0.70 * 0.214, 4)
+    expect(resultado.irs).toBeCloseTo(115, 2)
+    expect(resultado.ss).toBeCloseTo(1000 * 0.70 * 0.214, 2)
+    expect(resultado.liquido).toBeCloseTo(1000 - resultado.irs - resultado.ss, 2)
+  })
+
+  it('1º ano de atividade → SS a 0, independentemente da região ou categoria', () => {
+    const resultado = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: true,
+      regiao: 'continente',
+      categoriaCoeficiente: 0.75,
+      taxaSSPerfil: 0.214
+    })
+    expect(resultado.taxaSS).toBe(0)
+    expect(resultado.ss).toBe(0)
+    // Taxa de IRS de 1º ano é 25%, não 11,5%.
+    expect(resultado.taxaIrs).toBeCloseTo(0.25, 4)
+    expect(resultado.liquido).toBeCloseTo(1000 - resultado.irs, 2)
+  })
+
+  it('venda de mercadorias (0.15) → 20% de rendimento relevante, não 70%', () => {
+    const resultado = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: false,
+      regiao: 'continente',
+      categoriaCoeficiente: 0.15,
+      taxaSSPerfil: 0.214
+    })
+    expect(resultado.percentagemRendimentoRelevante).toBeCloseTo(0.20, 4)
+    expect(resultado.ss).toBeCloseTo(1000 * 0.20 * 0.214, 2)
+  })
+
+  it('Açores/Madeira aplicam a mesma redução de taxaRetencaoRegional', () => {
+    const continente = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: false,
+      regiao: 'continente',
+      categoriaCoeficiente: 0.75,
+      taxaSSPerfil: 0.214
+    })
+    const acores = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: false,
+      regiao: 'acores',
+      categoriaCoeficiente: 0.75,
+      taxaSSPerfil: 0.214
+    })
+    const madeira = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: false,
+      regiao: 'madeira',
+      categoriaCoeficiente: 0.75,
+      taxaSSPerfil: 0.214
+    })
+    expect(acores.taxaIrs).toBeCloseTo(taxaRetencaoRegional(continente.taxaIrs, 'acores'), 4)
+    expect(madeira.taxaIrs).toBeCloseTo(taxaRetencaoRegional(continente.taxaIrs, 'madeira'), 4)
+    // Região reduz o IRS, o que só pode aumentar (ou manter) o líquido.
+    expect(acores.liquido).toBeGreaterThan(continente.liquido)
+    expect(madeira.liquido).toBeGreaterThan(continente.liquido)
+  })
+
+  it('taxaSSPerfil não definida (null/undefined) → usa TAXA_SS_PADRAO', () => {
+    const resultado = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: false,
+      regiao: 'continente',
+      categoriaCoeficiente: 0.75,
+      taxaSSPerfil: null
+    })
+    expect(resultado.taxaSS).toBeCloseTo(0.70 * TAXA_SS_PADRAO, 4)
+  })
+
+  it('acumula_outro_trabalho → SS a 0, mesmo sem ser 1º ano', () => {
+    const resultado = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: false,
+      regiao: 'continente',
+      categoriaCoeficiente: 0.75,
+      taxaSSPerfil: 0.214,
+      acumulaOutroTrabalho: true
+    })
+    expect(resultado.taxaSS).toBe(0)
+    expect(resultado.ss).toBe(0)
+    // Ao contrário do 1º ano, acumular não muda a taxa de IRS.
+    expect(resultado.taxaIrs).toBeCloseTo(0.115, 4)
+    expect(resultado.liquido).toBeCloseTo(1000 - resultado.irs, 2)
+  })
+
+  it('acumula_outro_trabalho e 1º ano juntos → continua só SS a 0 (não duplica isenção)', () => {
+    const resultado = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: true,
+      regiao: 'continente',
+      categoriaCoeficiente: 0.75,
+      taxaSSPerfil: 0.214,
+      acumulaOutroTrabalho: true
+    })
+    expect(resultado.ss).toBe(0)
+  })
+
+  it('acumulaOutroTrabalho não definido (omitido) → tratado como false, sem rebentar', () => {
+    const resultado = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: false,
+      regiao: 'continente',
+      categoriaCoeficiente: 0.75,
+      taxaSSPerfil: 0.214
+    })
+    expect(resultado.ss).toBeCloseTo(1000 * 0.70 * 0.214, 2)
+  })
+
+  it('não recebe nem usa retencaoFonte — o líquido é o mesmo com ou sem retenção', () => {
+    // A retenção nunca muda o valor do líquido, só quem entrega o IRS ao
+    // Estado — por isso a função nem sequer tem esse parâmetro.
+    const resultado = calcularCenarioSimulador({
+      valorBruto: 1000,
+      primeiroAno: false,
+      regiao: 'continente',
+      categoriaCoeficiente: 0.75,
+      taxaSSPerfil: 0.214
+    })
+    expect(resultado).not.toHaveProperty('retencaoFonte')
   })
 })
 
