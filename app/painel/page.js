@@ -339,9 +339,6 @@ export default function Painel() {
   // (todos os recibos pagos vs só os pagos este mês) e passa-o às funções.
   const recibosPagos = recibos.filter((r) => !!r.data_pagamento)
 
-  const total = somarFaturado(recibos)
-  const recebido = somarRecebido(recibos)
-
   // "Pôr de lado" — estimativas simplificadas, sempre com base no que já foi
   // RECEBIDO: um recibo faturado mas ainda não pago não gera nenhuma
   // obrigação a pôr de lado nem entra no lucro líquido, porque ainda não há
@@ -381,16 +378,22 @@ export default function Painel() {
   if (pagamentosPorConta > 0) componentesSubtraidosLucro.push('Pagamentos por conta')
   const textoSubtracaoLucro = `Recebido menos ${juntarComE(componentesSubtraidosLucro)}`
 
-  // "Sobra real este mês" — cartão do Orçamento pessoal, RC PRO.
-  // Ao contrário do cartão "Pôr de lado" (também Pro, acumulado desde sempre),
-  // este é sempre reduzido ao mês corrente: só recibos efetivamente recebidos
-  // este mês, a fatia desses recibos que ainda terás de pôr de lado para
-  // impostos, e as despesas pessoais lançadas este mês.
+  // Mês civil corrente — âmbito partilhado pelo cartão "Este mês" do topo
+  // (faturado/recebido) e por "Sobra real este mês" (Orçamento pessoal, RC
+  // PRO) logo abaixo. Ao contrário do cartão "Pôr de lado" (também Pro,
+  // acumulado desde sempre), estes dois são sempre reduzidos ao mês corrente.
   const hoje = new Date()
   const chaveMesAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`
 
-  // Mesma convenção: filtra o âmbito aqui (recibos pagos este mês) e entrega
-  // às mesmas funções partilhadas — nenhuma fórmula própria escrita de novo.
+  // Faturado este mês — por data_emissao, inclui recibos ainda não pagos
+  // (faturar não depende de já teres recebido). Mesma convenção dos outros
+  // âmbitos "este mês": filtra aqui, entrega à função partilhada.
+  const recibosEmitidosMesAtual = recibos.filter((r) => r.data_emissao && r.data_emissao.slice(0, 7) === chaveMesAtual)
+  const faturadoMesAtual = somarFaturado(recibosEmitidosMesAtual)
+
+  // Recebido este mês — por data_pagamento, só recibos já pagos. Mesma
+  // convenção: filtra o âmbito aqui (recibos pagos este mês) e entrega às
+  // mesmas funções partilhadas — nenhuma fórmula própria escrita de novo.
   const recibosPagosMesAtual = recibosPagos.filter((r) => r.data_pagamento.slice(0, 7) === chaveMesAtual)
   const recebidoMesAtual = somarRecebido(recibosPagosMesAtual)
   const porDeLadoMesAtual = somarPorDeLado(recibosPagosMesAtual, perfil)
@@ -398,6 +401,18 @@ export default function Painel() {
     .filter((d) => d.data && d.data.slice(0, 7) === chaveMesAtual)
     .reduce((soma, d) => soma + d.valor, 0)
   const sobraRealMesAtual = recebidoMesAtual - porDeLadoMesAtual.total - despesasPessoaisMesAtual
+
+  // Lucro líquido este mês — cabeçalho do cartão de destaque do topo (mesma
+  // convenção de "Sobra real este mês": recebido do mês menos o que é de pôr
+  // de lado desse mês). Pagamentos por conta ficam de fora de propósito,
+  // tal como em "Sobra real este mês" — é um valor anual dividido em 3
+  // prestações trimestrais, não faz sentido atribuí-lo inteiro a um mês.
+  const componentesSubtraidosLucroMes = []
+  if (porDeLadoMesAtual.iva > 0) componentesSubtraidosLucroMes.push('IVA')
+  componentesSubtraidosLucroMes.push('Segurança Social')
+  if (porDeLadoMesAtual.irs > 0) componentesSubtraidosLucroMes.push('IRS')
+  const textoSubtracaoLucroMes = `Recebido este mês menos ${juntarComE(componentesSubtraidosLucroMes)}`
+  const lucroLiquidoMesAtual = recebidoMesAtual - porDeLadoMesAtual.total
 
   const clientesPrincipais = topClientes(recibos)
 
@@ -409,6 +424,17 @@ export default function Painel() {
       ? String(new Date().getFullYear())
       : periodoFaturacao
 
+  // Título do gráfico — tem de mudar com o filtro escolhido, senão "Faturação
+  // por mês" lê-se como se fosse sempre o mês corrente (era exatamente essa a
+  // confusão a resolver). Cobre os 4 valores de OPCOES_PERIODO_FATURACAO sem
+  // depender da lista deles em concreto, por isso um 5º período (ex. 2023)
+  // continua a funcionar sem precisar de tocar aqui.
+  const tituloFaturacaoPeriodo = periodoFaturacao === '12m'
+    ? 'Faturação — últimos 12 meses'
+    : periodoFaturacao === 'anoCorrente'
+      ? `Faturação ${new Date().getFullYear()}`
+      : `Faturação ${periodoFaturacao}`
+
   if (carregando) return <p className="p-5 text-brand-muted">A carregar...</p>
 
   return (
@@ -416,8 +442,23 @@ export default function Painel() {
       <PageTitle>Painel</PageTitle>
 
       <Card className="mb-4 border-2 border-brand-primary">
-        <p className="text-sm text-brand-muted mb-1">Lucro líquido real</p>
-        <p className="text-3xl font-bold text-gray-900">{lucroLiquidoReal.toFixed(2)} €</p>
+        <p className="text-sm text-brand-muted mb-1">Lucro líquido este mês</p>
+        <p className="text-3xl font-bold text-gray-900">{lucroLiquidoMesAtual.toFixed(2)} €</p>
+        <p className="text-xs text-brand-muted mt-2">{textoSubtracaoLucroMes}</p>
+
+        <div className="flex justify-between items-center py-1.5 mt-3 pt-3 border-t border-brand-line text-sm">
+          <span className="text-brand-muted">Faturado este mês</span>
+          <span className="text-gray-900 font-medium">{faturadoMesAtual.toFixed(2)} €</span>
+        </div>
+        <div className="flex justify-between items-center py-1.5 text-sm">
+          <span className="text-brand-muted">Recebido este mês</span>
+          <span className="text-gray-900 font-medium">{recebidoMesAtual.toFixed(2)} €</span>
+        </div>
+      </Card>
+
+      <Card className="mb-4">
+        <p className="text-sm text-brand-muted mb-1">Lucro líquido real (total acumulado)</p>
+        <p className="text-2xl font-bold text-gray-900">{lucroLiquidoReal.toFixed(2)} €</p>
         <p className="text-xs text-brand-muted mt-2">{textoSubtracaoLucro}</p>
         {!pagamentosPorContaDefinidoEsteAno && (
           <p className="text-xs text-brand-muted mt-1">* sem pagamentos por conta, ainda não calculados</p>
@@ -425,18 +466,8 @@ export default function Painel() {
       </Card>
 
       <Card className="mb-4">
-        <p className="text-sm text-brand-muted mb-1">Total faturado</p>
-        <p className="text-2xl font-bold text-gray-900">{total.toFixed(2)} €</p>
-      </Card>
-
-      <Card className="mb-4">
-        <p className="text-sm text-brand-muted mb-1">Total recebido</p>
-        <p className="text-2xl font-bold text-gray-900">{recebido.toFixed(2)} €</p>
-      </Card>
-
-      <Card className="mb-4">
         <div className="flex justify-between items-start mb-3">
-          <h3 className="font-semibold text-gray-900">Faturação por mês</h3>
+          <h3 className="font-semibold text-gray-900">{tituloFaturacaoPeriodo}</h3>
           <p className="text-sm text-brand-muted text-right">
             <strong className="text-gray-900">
               {totalFaturacaoPeriodo.toLocaleString('pt-PT', { maximumFractionDigits: 0 })} €
