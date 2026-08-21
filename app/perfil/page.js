@@ -47,6 +47,7 @@ export default function Perfil() {
   const [regimeIva, setRegimeIva] = useState('isento')
   const [taxaSS, setTaxaSS] = useState('0.214')
   const [regiao, setRegiao] = useState('continente')
+  const [codigoCirs, setCodigoCirs] = useState('')
   const [acumulaOutroTrabalho, setAcumulaOutroTrabalho] = useState(false)
   const [pensionista, setPensionista] = useState(false)
   const [mensagem, setMensagem] = useState('')
@@ -134,6 +135,7 @@ export default function Perfil() {
       setRegimeIva(perfil.regime_iva || 'isento')
       setTaxaSS(perfil.taxa_ss != null ? String(perfil.taxa_ss) : '0.214')
       setRegiao(perfil.regiao || 'continente')
+      setCodigoCirs(perfil.codigo_cirs || '')
       setAcumulaOutroTrabalho(!!perfil.acumula_outro_trabalho)
       setPensionista(!!perfil.pensionista)
 
@@ -180,6 +182,7 @@ export default function Perfil() {
       regime_iva: regimeIva,
       taxa_ss: parseFloat(taxaSS),
       regiao: regiao,
+      codigo_cirs: codigoCirs || null,
       acumula_outro_trabalho: acumulaOutroTrabalho,
       pensionista: pensionista
     }, { onConflict: 'id' })
@@ -408,10 +411,36 @@ export default function Perfil() {
             </RotuloInfo>
           </Label>
           <Select id="categoria" value={categoriaCoeficiente} onChange={(e) => setCategoriaCoeficiente(e.target.value)}>
-            <option value="0.75">Profissão liberal (75%)</option>
+            <option value="0.75">Profissão liberal — saúde, direito, desporto, artes, etc. (75%)</option>
             <option value="0.35">Outros serviços (35%)</option>
-            <option value="0.15">Venda de mercadorias (15%)</option>
+            <option value="0.15">Venda de mercadorias ou produtos, incluindo produção agrícola (15%)</option>
           </Select>
+          <p className="text-xs text-brand-muted mt-1.5">
+            <RotuloInfo
+              titulo="Qual categoria escolher?"
+              texto="Se a tua atividade não estiver listada na tabela oficial do artigo 151º do CIRS (médicos, advogados, desportistas, artistas, e outras profissões liberais específicas), aplica-se a categoria &quot;Outros serviços&quot;, não a &quot;Profissão liberal&quot;, mesmo que pareça uma atividade especializada."
+            >
+              Qual categoria escolher?
+            </RotuloInfo>
+          </p>
+        </div>
+
+        <div>
+          <Label htmlFor="codigo-cirs">
+            <RotuloInfo
+              titulo="Código de atividade (CIRS)"
+              texto="É o código que identifica a tua atividade específica na tabela do artigo 151º do CIRS (ex: 1332 Programadores informáticos, 1519 Outros prestadores de serviços). Não sabes o teu? Consulta no Portal das Finanças, na tua atividade aberta."
+            >
+              Código de atividade (CIRS)
+            </RotuloInfo>
+          </Label>
+          <Input
+            id="codigo-cirs"
+            type="text"
+            placeholder="Ex: 1519"
+            value={codigoCirs}
+            onChange={(e) => setCodigoCirs(e.target.value)}
+          />
         </div>
 
         <div>

@@ -44,6 +44,12 @@ function hojeYMD() {
   return `${ano}-${mes}-${dia}`
 }
 
+function formatarTaxaIva(taxaIva) {
+  if (taxaIva == null) return ''
+  if (taxaIva === 0) return 'Isento'
+  return `${(taxaIva * 100).toFixed(0)}%`
+}
+
 function escaparCSV(valor) {
   const texto = String(valor ?? '')
   if (texto.includes(';') || texto.includes('"') || texto.includes('\n')) {
@@ -57,10 +63,13 @@ export default function Recibos() {
   const [recibos, setRecibos] = useState([])
   const [cliente, setCliente] = useState('')
   const [nif, setNif] = useState('')
+  const [descricaoServico, setDescricaoServico] = useState('')
   const [valor, setValor] = useState('')
+  const [taxaIva, setTaxaIva] = useState('')
   const [dataEmissao, setDataEmissao] = useState('')
   const [dataPagamento, setDataPagamento] = useState('')
   const [retencao, setRetencao] = useState(false)
+  const [codigoCirs, setCodigoCirs] = useState('')
   const [editandoId, setEditandoId] = useState(null)
   const [mensagem, setMensagem] = useState('')
 
@@ -89,13 +98,27 @@ export default function Recibos() {
     carregarRecibos()
   }, [])
 
+  // Pré-preenche Taxa de IVA e Código CIRS a partir do Perfil, só enquanto
+  // estivermos a preparar um recibo NOVO (não a editar um já existente, que
+  // tem os seus próprios valores) — e só nos campos que ainda estiverem
+  // vazios, para nunca apagar algo que a pessoa já tenha escrito.
+  useEffect(() => {
+    if (editandoId) return
+    if (!perfil) return
+    setTaxaIva((atual) => atual || (perfil.regime_iva === 'normal' ? '0.23' : '0'))
+    setCodigoCirs((atual) => atual || perfil.codigo_cirs || '')
+  }, [perfil, editandoId])
+
   function limparFormulario() {
     setCliente('')
     setNif('')
+    setDescricaoServico('')
     setValor('')
+    setTaxaIva('')
     setDataEmissao('')
     setDataPagamento('')
     setRetencao(false)
+    setCodigoCirs('')
     setEditandoId(null)
   }
 
@@ -103,10 +126,13 @@ export default function Recibos() {
     setEditandoId(recibo.id)
     setCliente(recibo.cliente || '')
     setNif(recibo.nif || '')
+    setDescricaoServico(recibo.descricao_servico || '')
     setValor(recibo.valor != null ? String(recibo.valor) : '')
+    setTaxaIva(recibo.taxa_iva != null ? String(recibo.taxa_iva) : '')
     setDataEmissao(recibo.data_emissao || '')
     setDataPagamento(recibo.data_pagamento || '')
     setRetencao(!!recibo.retencao)
+    setCodigoCirs(recibo.codigo_cirs || '')
     setMensagem('')
 
     // O formulário fica no topo da página — sem isto, preencher os campos
@@ -124,10 +150,13 @@ export default function Recibos() {
     const dadosRecibo = {
       cliente: cliente,
       nif: nif || null,
+      descricao_servico: descricaoServico || null,
       valor: parseFloat(valor),
+      taxa_iva: taxaIva !== '' ? parseFloat(taxaIva) : null,
       data_emissao: dataEmissao,
       data_pagamento: dataPagamento || null,
-      retencao: retencao
+      retencao: retencao,
+      codigo_cirs: codigoCirs || null
     }
 
     const { error } = editandoId
@@ -158,13 +187,14 @@ export default function Recibos() {
   }
 
   function exportarCSV() {
-    const cabecalho = ['Cliente', 'NIF', 'Data de Emissão', 'Data de Pagamento', 'Valor', 'Retenção', 'Estado']
+    const cabecalho = ['Cliente', 'NIF', 'Data de Emissão', 'Data de Pagamento', 'Valor', 'Taxa de IVA', 'Retenção', 'Estado']
     const linhas = recibos.map((r) => [
       r.cliente,
       r.nif || '',
       r.data_emissao,
       r.data_pagamento || '',
       r.valor,
+      formatarTaxaIva(r.taxa_iva),
       r.retencao ? 'Sim' : 'Não',
       r.data_pagamento ? 'Pago' : 'Pendente'
     ])
@@ -215,7 +245,23 @@ export default function Recibos() {
 
         <Input type="text" placeholder="Cliente *" value={cliente} onChange={(e) => setCliente(e.target.value)} />
         <Input type="text" placeholder="NIF" value={nif} onChange={(e) => setNif(e.target.value)} />
+        <Input
+          type="text"
+          placeholder="Descrição do serviço (ex. Consultoria de marketing digital)"
+          value={descricaoServico}
+          onChange={(e) => setDescricaoServico(e.target.value)}
+        />
         <Input type="number" placeholder="Valor (€) *" value={valor} onChange={(e) => setValor(e.target.value)} />
+
+        <div>
+          <Label htmlFor="taxa-iva-recibo">Taxa de IVA</Label>
+          <Select id="taxa-iva-recibo" value={taxaIva} onChange={(e) => setTaxaIva(e.target.value)}>
+            <option value="0">Isento (art. 53º)</option>
+            <option value="0.23">23%</option>
+            <option value="0.13">13%</option>
+            <option value="0.06">6%</option>
+          </Select>
+        </div>
 
         <div>
           <Label htmlFor="data-emissao">Data de emissão *</Label>
@@ -251,6 +297,17 @@ export default function Recibos() {
               Retenção na fonte
             </RotuloInfo>
           </label>
+        </div>
+
+        <div>
+          <Label htmlFor="codigo-cirs-recibo">Código CIRS</Label>
+          <Input
+            id="codigo-cirs-recibo"
+            type="text"
+            placeholder="Ex: 1519"
+            value={codigoCirs}
+            onChange={(e) => setCodigoCirs(e.target.value)}
+          />
         </div>
 
         <div className="flex gap-2.5">
@@ -318,6 +375,9 @@ export default function Recibos() {
         >
           <div>
             <strong className="text-gray-900 font-medium">{r.cliente}</strong>
+            {r.descricao_servico && (
+              <div className="text-brand-muted text-xs">{r.descricao_servico}</div>
+            )}
             <div className="text-gray-900">{r.valor}€ — {r.data_emissao}</div>
           </div>
           {r.data_pagamento ? (
